@@ -20,6 +20,10 @@ export type ViewKey =
   | 'secrets'
   | 'marketplace'
   | 'flags'
+  | 'mesh'
+  | 'audit'
+  | 'cdn'
+  | 'billing'
   | 'team'
   | 'settings'
 
