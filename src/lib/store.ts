@@ -10,7 +10,12 @@ export type ViewKey =
   | 'notifications'
   | 'domains'
   | 'deployments'
+  | 'pipelines'
   | 'logs'
+  | 'monitoring'
+  | 'backups'
+  | 'analytics'
+  | 'simulator'
   | 'team'
   | 'settings'
 

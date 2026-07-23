@@ -10,14 +10,20 @@ import { cn } from '@/lib/utils'
 
 import { OverviewView } from './views/overview-view'
 import { AppsView } from './views/apps-view'
+import { PipelinesView } from './views/pipelines-view'
+import { AnalyticsView } from './views/analytics-view'
+import { ScalingSimulatorView } from './views/scaling-simulator-view'
 import { DatabasesView } from './views/databases-view'
 import { WebSocketsView } from './views/websockets-view'
 import { NotificationsView } from './views/notifications-view'
+import { BackupsView } from './views/backups-view'
+import { MonitoringView } from './views/monitoring-view'
 import { DomainsView } from './views/domains-view'
 import { DeploymentsView } from './views/deployments-view'
 import { LogsView } from './views/logs-view'
 import { TeamView } from './views/team-view'
 import { SettingsView } from './views/settings-view'
+import { CommandPalette } from './command-palette'
 
 export function DashboardShell() {
   const { view, sidebarOpen } = useNexoraStore()
@@ -48,9 +54,14 @@ export function DashboardShell() {
           <div className="mx-auto max-w-7xl">
             {view === 'overview' && <OverviewView />}
             {view === 'apps' && <AppsView />}
+            {view === 'pipelines' && <PipelinesView />}
+            {view === 'analytics' && <AnalyticsView />}
+            {view === 'simulator' && <ScalingSimulatorView />}
             {view === 'databases' && <DatabasesView />}
             {view === 'websockets' && <WebSocketsView />}
             {view === 'notifications' && <NotificationsView />}
+            {view === 'backups' && <BackupsView />}
+            {view === 'monitoring' && <MonitoringView />}
             {view === 'domains' && <DomainsView />}
             {view === 'deployments' && <DeploymentsView />}
             {view === 'logs' && <LogsView />}
@@ -82,6 +93,7 @@ export function DashboardShell() {
       </div>
 
       <PushToaster />
+      <CommandPalette />
     </div>
   )
 }

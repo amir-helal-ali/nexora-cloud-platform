@@ -15,6 +15,11 @@ import {
   Cloud,
   Zap,
   Shield,
+  Activity,
+  Archive,
+  GitPullRequest,
+  BarChart3,
+  FlaskConical,
 } from 'lucide-react'
 import { useNexoraStore, type ViewKey } from '@/lib/store'
 import { Logo } from './brand'
@@ -34,12 +39,17 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { key: 'overview', label: 'Overview', icon: LayoutDashboard, description: 'Live dashboard', group: 'platform' },
   { key: 'apps', label: 'Applications', icon: Boxes, description: 'Rust, PHP, Next.js', badge: '7', group: 'platform' },
+  { key: 'pipelines', label: 'CI/CD Pipelines', icon: GitPullRequest, description: 'Build & deploy pipelines', badge: '4', group: 'platform' },
+  { key: 'analytics', label: 'Analytics', icon: BarChart3, description: 'Traffic & performance', group: 'platform' },
+  { key: 'simulator', label: 'Scaling Simulator', icon: FlaskConical, description: 'Test auto-scaling', group: 'platform' },
   { key: 'databases', label: 'Databases', icon: Database, description: 'SQL, NoSQL, Cache', badge: '6', group: 'resources' },
   { key: 'websockets', label: 'WebSocket Services', icon: Radio, description: 'Realtime endpoints', badge: '4', group: 'resources' },
   { key: 'notifications', label: 'Push Notifications', icon: BellRing, description: 'In-app, Email, Push', group: 'resources' },
-  { key: 'domains', label: 'Domains & SSL', icon: Globe, description: 'DNS, certificates', badge: '8', group: 'admin' },
+  { key: 'backups', label: 'Backups', icon: Archive, description: 'Snapshots & restore', badge: '10', group: 'resources' },
+  { key: 'monitoring', label: 'Monitoring & Alerts', icon: Activity, description: 'Alerts & metrics', group: 'observability' },
   { key: 'deployments', label: 'Deployments', icon: GitCommitHorizontal, description: 'CI/CD history', group: 'observability' },
   { key: 'logs', label: 'Logs', icon: ScrollText, description: 'Live streaming logs', group: 'observability' },
+  { key: 'domains', label: 'Domains & SSL', icon: Globe, description: 'DNS, certificates', badge: '8', group: 'admin' },
   { key: 'team', label: 'Team', icon: Users, description: 'Members & roles', badge: '7', group: 'admin' },
   { key: 'settings', label: 'Settings', icon: Settings, description: 'Account & plan', group: 'admin' },
 ]

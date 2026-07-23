@@ -30,9 +30,14 @@ const NOTIF_COLORS: Record<string, string> = {
 const VIEW_TITLES: Record<string, { title: string; subtitle: string }> = {
   overview: { title: 'Overview', subtitle: 'Real-time fleet monitoring across all regions' },
   apps: { title: 'Applications', subtitle: 'Multi-runtime deployments: Rust, PHP, Next.js, Node' },
+  pipelines: { title: 'CI/CD Pipelines', subtitle: 'Build, test, and deploy from Git with full visibility' },
+  analytics: { title: 'Analytics', subtitle: 'Traffic, performance, geography & device insights' },
+  simulator: { title: 'Scaling Simulator', subtitle: 'Test how your fleet responds to traffic changes' },
   databases: { title: 'Databases', subtitle: 'Managed SQL, NoSQL, and in-memory stores' },
   websockets: { title: 'WebSocket Services', subtitle: 'Persistent realtime endpoints & channels' },
   notifications: { title: 'Push Notifications', subtitle: 'In-app, email, webhook & Web Push delivery' },
+  backups: { title: 'Backups & Snapshots', subtitle: 'Automatic and manual backups with point-in-time restore' },
+  monitoring: { title: 'Monitoring & Alerts', subtitle: 'Real-time alerting on custom metric thresholds' },
   domains: { title: 'Domains & SSL', subtitle: 'DNS management & automatic certificate renewal' },
   deployments: { title: 'Deployments', subtitle: 'CI/CD pipeline history & rollback' },
   logs: { title: 'Logs', subtitle: 'Live streaming logs across all services' },
@@ -46,12 +51,12 @@ export function Topbar() {
   const [search, setSearch] = useState('')
   const searchRef = useRef<HTMLInputElement>(null)
 
-  // Cmd+K to focus search
+  // Cmd+K to open command palette
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault()
-        searchRef.current?.focus()
+        document.dispatchEvent(new CustomEvent('open-command-palette'))
       }
     }
     window.addEventListener('keydown', handler)
@@ -77,20 +82,17 @@ export function Topbar() {
         <p className="hidden truncate text-xs text-muted-foreground lg:block">{meta.subtitle}</p>
       </div>
 
-      {/* Search */}
-      <div className="relative hidden w-72 md:block">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          ref={searchRef}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search apps, domains..."
-          className="h-9 pl-9 pr-12 text-sm"
-        />
-        <kbd className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 hidden select-none items-center gap-0.5 rounded border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground lg:flex">
+      {/* Search — opens command palette */}
+      <button
+        onClick={() => document.dispatchEvent(new CustomEvent('open-command-palette'))}
+        className="relative hidden w-72 items-center rounded-md border border-input bg-background px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent md:flex"
+      >
+        <Search className="mr-2 h-3.5 w-3.5" />
+        <span className="flex-1 text-left">Search or jump to...</span>
+        <kbd className="pointer-events-none flex select-none items-center gap-0.5 rounded border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
           <Command className="h-2.5 w-2.5" /> K
         </kbd>
-      </div>
+      </button>
 
       <LiveStatusBadge />
 
