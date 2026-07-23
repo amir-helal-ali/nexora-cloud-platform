@@ -20,6 +20,10 @@ import {
   GitPullRequest,
   BarChart3,
   FlaskConical,
+  Network,
+  KeyRound,
+  Store,
+  Flag,
 } from 'lucide-react'
 import { useNexoraStore, type ViewKey } from '@/lib/store'
 import { Logo } from './brand'
@@ -33,7 +37,7 @@ interface NavItem {
   icon: React.ComponentType<{ className?: string }>
   description: string
   badge?: string
-  group: 'platform' | 'resources' | 'observability' | 'admin'
+  group: 'platform' | 'resources' | 'observability' | 'admin' | 'integrations'
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -42,13 +46,17 @@ const NAV_ITEMS: NavItem[] = [
   { key: 'pipelines', label: 'CI/CD Pipelines', icon: GitPullRequest, description: 'Build & deploy pipelines', badge: '4', group: 'platform' },
   { key: 'analytics', label: 'Analytics', icon: BarChart3, description: 'Traffic & performance', group: 'platform' },
   { key: 'simulator', label: 'Scaling Simulator', icon: FlaskConical, description: 'Test auto-scaling', group: 'platform' },
+  { key: 'gateway', label: 'API Gateway', icon: Network, description: 'Routes & rate limiting', badge: '10', group: 'platform' },
+  { key: 'flags', label: 'Feature Flags', icon: Flag, description: 'A/B testing & rollout', badge: '6', group: 'platform' },
   { key: 'databases', label: 'Databases', icon: Database, description: 'SQL, NoSQL, Cache', badge: '6', group: 'resources' },
   { key: 'websockets', label: 'WebSocket Services', icon: Radio, description: 'Realtime endpoints', badge: '4', group: 'resources' },
   { key: 'notifications', label: 'Push Notifications', icon: BellRing, description: 'In-app, Email, Push', group: 'resources' },
   { key: 'backups', label: 'Backups', icon: Archive, description: 'Snapshots & restore', badge: '10', group: 'resources' },
+  { key: 'secrets', label: 'Secrets Manager', icon: KeyRound, description: 'Encrypted env vars', badge: '12', group: 'resources' },
   { key: 'monitoring', label: 'Monitoring & Alerts', icon: Activity, description: 'Alerts & metrics', group: 'observability' },
   { key: 'deployments', label: 'Deployments', icon: GitCommitHorizontal, description: 'CI/CD history', group: 'observability' },
   { key: 'logs', label: 'Logs', icon: ScrollText, description: 'Live streaming logs', group: 'observability' },
+  { key: 'marketplace', label: 'Marketplace', icon: Store, description: 'Add-ons & integrations', badge: '28', group: 'integrations' },
   { key: 'domains', label: 'Domains & SSL', icon: Globe, description: 'DNS, certificates', badge: '8', group: 'admin' },
   { key: 'team', label: 'Team', icon: Users, description: 'Members & roles', badge: '7', group: 'admin' },
   { key: 'settings', label: 'Settings', icon: Settings, description: 'Account & plan', group: 'admin' },
@@ -58,6 +66,7 @@ const GROUPS: { key: NavItem['group']; label: string }[] = [
   { key: 'platform', label: 'Platform' },
   { key: 'resources', label: 'Resources' },
   { key: 'observability', label: 'Observability' },
+  { key: 'integrations', label: 'Integrations' },
   { key: 'admin', label: 'Administration' },
 ]
 

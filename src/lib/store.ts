@@ -16,6 +16,10 @@ export type ViewKey =
   | 'backups'
   | 'analytics'
   | 'simulator'
+  | 'gateway'
+  | 'secrets'
+  | 'marketplace'
+  | 'flags'
   | 'team'
   | 'settings'
 

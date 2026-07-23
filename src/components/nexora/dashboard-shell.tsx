@@ -13,11 +13,15 @@ import { AppsView } from './views/apps-view'
 import { PipelinesView } from './views/pipelines-view'
 import { AnalyticsView } from './views/analytics-view'
 import { ScalingSimulatorView } from './views/scaling-simulator-view'
+import { ApiGatewayView } from './views/api-gateway-view'
+import { FeatureFlagsView } from './views/feature-flags-view'
 import { DatabasesView } from './views/databases-view'
 import { WebSocketsView } from './views/websockets-view'
 import { NotificationsView } from './views/notifications-view'
 import { BackupsView } from './views/backups-view'
+import { SecretsView } from './views/secrets-view'
 import { MonitoringView } from './views/monitoring-view'
+import { MarketplaceView } from './views/marketplace-view'
 import { DomainsView } from './views/domains-view'
 import { DeploymentsView } from './views/deployments-view'
 import { LogsView } from './views/logs-view'
@@ -57,11 +61,15 @@ export function DashboardShell() {
             {view === 'pipelines' && <PipelinesView />}
             {view === 'analytics' && <AnalyticsView />}
             {view === 'simulator' && <ScalingSimulatorView />}
+            {view === 'gateway' && <ApiGatewayView />}
+            {view === 'flags' && <FeatureFlagsView />}
             {view === 'databases' && <DatabasesView />}
             {view === 'websockets' && <WebSocketsView />}
             {view === 'notifications' && <NotificationsView />}
             {view === 'backups' && <BackupsView />}
+            {view === 'secrets' && <SecretsView />}
             {view === 'monitoring' && <MonitoringView />}
+            {view === 'marketplace' && <MarketplaceView />}
             {view === 'domains' && <DomainsView />}
             {view === 'deployments' && <DeploymentsView />}
             {view === 'logs' && <LogsView />}
