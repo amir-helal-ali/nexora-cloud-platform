@@ -1,0 +1,215 @@
+// Nexora Cloud — Shared Hosting Platform Schema
+// Supports multi-runtime: Rust / PHP / Next.js / WebSocket / Static
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  avatar    String?
+  role      String   @default("owner") // owner | admin | developer | viewer
+  plan      String   @default("pro")   // free | starter | pro | enterprise
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  apps        App[]
+  databases   Database[]
+  domains     Domain[]
+  deployments Deployment[]
+  notifications Notification[]
+  activities  Activity[]
+  teamMembers TeamMember[]
+}
+
+model App {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  runtime     String   // rust | php | nextjs | static | node
+  framework   String?  // actix-web | axum | laravel | symfony | next | nuxt | astro
+  region      String   @default("fra1") // fra1 | nyc1 | sfo1 | sin1 | syd1
+  status      String   @default("running") // building | running | stopped | crashed | deploying
+  branch      String   @default("main")
+  repoUrl     String?
+  port        Int      @default(3000)
+  instances   Int      @default(1)
+  memoryLimit Int      @default(512)  // MB
+  cpuLimit    Int      @default(1)    // cores
+  autoScale   Boolean  @default(true)
+  minInstances Int     @default(1)
+  maxInstances Int     @default(5)
+  customDomain String?
+  envCount    Int      @default(0)
+  lastDeploy  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  deployments Deployment[]
+  metrics     Metric[]
+  logs        Log[]
+  websockets  WebSocketService[]
+  domains     Domain[] @relation("DomainApp")
+}
+
+model Database {
+  id          String   @id @default(cuid())
+  name        String
+  engine      String   // mysql | postgresql | mongodb | redis | sqlite | mariadb
+  version     String   // 8.0 | 16 | 7.0 | 6.2 ...
+  region      String   @default("fra1")
+  status      String   @default("running") // running | stopped | creating | backup
+  size        Int      @default(1)         // GB allocated
+  usedMb      Int      @default(0)
+  connections Int      @default(0)
+  maxConnections Int   @default(100)
+  host        String
+  port        Int
+  username    String
+  password    String   // stored hashed in real prod
+  ssl         Boolean  @default(true)
+  backupEnabled Boolean @default(true)
+  lastBackup  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  metrics     Metric[]
+}
+
+model Domain {
+  id          String   @id @default(cuid())
+  domain      String   @unique
+  type        String   @default("primary") // primary | alias | subdomain | wildcard
+  status      String   @default("active")  // active | pending | verifying | failed
+  sslStatus   String   @default("active")  // active | pending | none | expired
+  sslExpiry   DateTime?
+  dnsVerified Boolean  @default(true)
+  autoRenew   Boolean  @default(true)
+  targetAppId String?
+  targetApp   App?     @relation("DomainApp", fields: [targetAppId], references: [id])
+  nameservers String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Deployment {
+  id          String   @id @default(cuid())
+  commitSha   String
+  commitMsg   String
+  branch      String
+  status      String   @default("queued") // queued | building | success | failed | cancelled
+  stage       String   @default("queued") // queued | cloning | installing | building | deploying | live
+  duration    Int      @default(0)  // seconds
+  triggeredBy String
+  log         String?
+  createdAt   DateTime @default(now())
+
+  appId       String
+  app         App      @relation(fields: [appId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model WebSocketService {
+  id          String   @id @default(cuid())
+  name        String
+  endpoint    String
+  protocol    String   @default("ws") // ws | wss
+  status      String   @default("running")
+  connections Int      @default(0)
+  maxConnections Int   @default(10000)
+  messagesPerSec Int   @default(0)
+  bandwidthKbps Int    @default(0)
+  channels    Int      @default(1)
+  persistence Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  appId       String?
+  app         App?     @relation(fields: [appId], references: [id])
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  title       String
+  message     String
+  type        String   @default("info") // info | success | warning | error | push
+  channel     String   @default("in_app") // in_app | email | sms | webhook | push
+  status      String   @default("sent") // queued | sent | delivered | failed
+  recipients  Int      @default(1)
+  delivered   Int      @default(0)
+  opened      Int      @default(0)
+  payload     String?
+  createdAt   DateTime @default(now())
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Activity {
+  id          String   @id @default(cuid())
+  action      String   // deploy | create_app | delete_app | scale | restart | login ...
+  resource    String
+  resourceId  String?
+  detail      String
+  ip          String?
+  createdAt   DateTime @default(now())
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model TeamMember {
+  id          String   @id @default(cuid())
+  email       String
+  name        String
+  role        String   @default("developer") // owner | admin | developer | viewer
+  status      String   @default("active")    // active | pending | suspended
+  lastActive  DateTime?
+  createdAt   DateTime @default(now())
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Log {
+  id          String   @id @default(cuid())
+  ts          DateTime @default(now())
+  level       String   // info | warn | error | debug
+  source      String   // app | build | runtime | system
+  message     String
+
+  appId       String
+  app         App      @relation(fields: [appId], references: [id], onDelete: Cascade)
+}
+
+model Metric {
+  id          String   @id @default(cuid())
+  ts          DateTime @default(now())
+  cpu         Float    // percent
+  memory      Float    // percent
+  bandwidthKbps Float
+  requestsPerSec Float
+  errorRate   Float
+
+  appId       String?
+  app         App?     @relation(fields: [appId], references: [id])
+  databaseId  String?
+  database    Database? @relation(fields: [databaseId], references: [id])
+}
