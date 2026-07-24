@@ -185,13 +185,13 @@ jobs:
         run: bun audit || true  # Non-blocking
 
       - name: 🔍 CodeQL analysis
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: javascript-typescript
         continue-on-error: true
 
       - name: 🔍 Perform CodeQL analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
         continue-on-error: true
 
   # ---------------------------------------------------------------------------
