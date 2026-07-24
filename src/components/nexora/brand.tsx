@@ -5,7 +5,6 @@ import { useTheme } from 'next-themes'
 import { Moon, Sun, Cloud, CloudOff, Activity } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { useRealtime } from '@/hooks/use-realtime'
-import { useMounted } from './theme-provider'
 
 export function LiveStatusBadge() {
   const { connected } = useRealtime()
@@ -26,15 +25,19 @@ export function LiveStatusBadge() {
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme()
-  const mounted = useMounted()
-  if (!mounted) return <div className="h-9 w-9" />
+  // Always render the same DOM structure on server and client to avoid
+  // hydration mismatches that shift React useId counters for Radix UI.
+  // Both icons are always rendered; CSS toggles visibility via the `dark` class
+  // that next-themes adds to the <html> element.
   return (
     <button
+      suppressHydrationWarning
       onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
       className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-background text-foreground transition-colors hover:bg-accent"
       aria-label="Toggle theme"
     >
-      {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+      <Sun className="hidden h-4 w-4 dark:block" />
+      <Moon className="block h-4 w-4 dark:hidden" />
     </button>
   )
 }
