@@ -1,0 +1,42 @@
+# ============================================================================
+# Nexora Cloud Platform — Development Docker Compose (override)
+# ============================================================================
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# This file overrides production settings for local development:
+#   - Mounts source code as volumes (hot reload)
+#   - Disables healthchecks for faster iteration
+#   - Exposes debug ports
+# ============================================================================
+
+services:
+  nexora:
+    build:
+      target: builder
+    container_name: nexora-dashboard-dev
+    environment:
+      - NODE_ENV=development
+      - NEXT_TELEMETRY_DISABLED=1
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+      - nexora-data:/app/data
+    command: sh -c "npx prisma db push --accept-data-loss && npx bun run scripts/seed.ts || true && bun run dev"
+    healthcheck:
+      disable: true
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+
+  realtime:
+    container_name: nexora-realtime-dev
+    volumes:
+      - ./mini-services/realtime-service:/app/src
+      - /app/src/node_modules
+    command: sh -c "cd /app/src && bun --hot index.ts"
+    healthcheck:
+      disable: true

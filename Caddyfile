@@ -1,23 +1,78 @@
-:81 {
-	@transform_port_query {
-		query XTransformPort=*
+# ============================================================================
+# Nexora Cloud Platform — Caddyfile (production reverse proxy)
+# ============================================================================
+# Caddy provides:
+#   - Automatic HTTPS via Let's Encrypt
+#   - HTTP/3 support
+#   - WebSocket proxying
+#   - Compression (gzip + brotli)
+#   - Security headers
+#
+# Replace {$DASHBOARD_DOMAIN} with your real domain, e.g.:
+#   dashboard.nexora.app
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# Main dashboard (Next.js app)
+# ----------------------------------------------------------------------------
+{$DASHBOARD_DOMAIN} {
+	encode zstd gzip
+
+	# Security headers
+	header {
+		# HSTS: force HTTPS for 1 year
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		# Prevent clickjacking
+		X-Frame-Options "SAMEORIGIN"
+		# Prevent MIME-type sniffing
+		X-Content-Type-Options "nosniff"
+		# Referrer policy
+		Referrer-Policy "strict-origin-when-cross-origin"
+		# Permissions policy
+		Permissions-Policy "geolocation=(), microphone=(), camera=()"
+		# Remove server banner
+		-Server
+		# CSP (adjust as needed for your app)
+		Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' wss: ws:; frame-ancestors 'self'"
 	}
 
-	handle @transform_port_query {
-		reverse_proxy localhost:{query.XTransformPort} {
-			header_up Host {host}
-			header_up X-Forwarded-For {remote_host}
-			header_up X-Forwarded-Proto {scheme}
-			header_up X-Real-IP {remote_host}
-		}
+	# Next.js API routes + static assets
+	reverse_proxy nexora:3000
+
+	# Long-lived connections (SSE, streaming)
+	@api_routes match /api/*
+	reverse_proxy @api_routes nexora:3000 {
+		flush_interval -1
+	}
+}
+
+# ----------------------------------------------------------------------------
+# Realtime WebSocket service (separate subdomain recommended)
+# ----------------------------------------------------------------------------
+{$REALTIME_DOMAIN} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Frame-Options "DENY"
+		X-Content-Type-Options "nosniff"
+		-Server
 	}
 
-	handle {
-		reverse_proxy localhost:3000 {
-			header_up Host {host}
-			header_up X-Forwarded-For {remote_host}
-			header_up X-Forwarded-Proto {scheme}
-			header_up X-Real-IP {remote_host}
+	# Socket.io with sticky sessions (important for WebSocket!)
+	reverse_proxy realtime:3003 {
+		# Flush immediately for real-time data
+		flush_interval -1
+		# Enable WebSocket upgrade
+		transport http {
+			versions 1.1
 		}
 	}
+}
+
+# ----------------------------------------------------------------------------
+# HTTP → HTTPS redirect (default :80 block)
+# ----------------------------------------------------------------------------
+:80 {
+	redir https://{host}{uri} permanent
 }

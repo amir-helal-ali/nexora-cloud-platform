@@ -1,0 +1,136 @@
+# ============================================================================
+# Nexora Cloud Platform — Production Docker Compose
+# ============================================================================
+# Usage:
+#   docker compose up -d           # Start all services
+#   docker compose up -d --build   # Rebuild images
+#   docker compose logs -f         # Follow logs
+#   docker compose down            # Stop all services
+#   docker compose down -v         # Stop + delete volumes (data loss!)
+# ============================================================================
+
+services:
+  # --------------------------------------------------------------------------
+  # Next.js Dashboard (main app)
+  # --------------------------------------------------------------------------
+  nexora:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nexora-dashboard
+    restart: unless-stopped
+    ports:
+      - "${DASHBOARD_PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=file:/app/data/nexora.db
+      - REALTIME_PORT=3003
+      - REALTIME_URL=http://realtime:3003
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-change-me-in-production}
+      # Add your external integrations below:
+      # - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      # - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # - SENTRY_DSN=${SENTRY_DSN}
+    volumes:
+      - nexora-data:/app/data
+    depends_on:
+      realtime:
+        condition: service_healthy
+    networks:
+      - nexora-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/stats"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  # --------------------------------------------------------------------------
+  # Realtime WebSocket Service
+  # --------------------------------------------------------------------------
+  realtime:
+    build:
+      context: .
+      dockerfile: Dockerfile.realtime
+    container_name: nexora-realtime
+    restart: unless-stopped
+    ports:
+      - "${REALTIME_PORT:-3003}:3003"
+    environment:
+      - NODE_ENV=production
+      - REALTIME_PORT=3003
+    networks:
+      - nexora-network
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:3003/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # --------------------------------------------------------------------------
+  # Caddy Reverse Proxy (HTTPS termination + auto SSL)
+  # --------------------------------------------------------------------------
+  caddy:
+    image: caddy:2-alpine
+    container_name: nexora-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    environment:
+      - DASHBOARD_DOMAIN=${DASHBOARD_DOMAIN:-localhost}
+      - REALTIME_DOMAIN=${REALTIME_DOMAIN:-localhost}
+    depends_on:
+      - nexora
+      - realtime
+    networks:
+      - nexora-network
+    profiles: ["prod"]
+
+# Volumes for data persistence
+volumes:
+  nexora-data:
+    driver: local
+    name: nexora-data
+  caddy-data:
+    driver: local
+  caddy-config:
+    driver: local
+
+# Network for inter-service communication
+networks:
+  nexora-network:
+    driver: bridge
+    name: nexora-network

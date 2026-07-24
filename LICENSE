@@ -1,0 +1,37 @@
+MIT License
+
+Copyright (c) 2026 Nexora Cloud Platform
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+Nexora Cloud Platform includes contributions from:
+- Ahmed Hassan (@ahmedhassan)
+- The open-source community
+
+Third-party licenses:
+- Next.js: MIT License (https://nextjs.org)
+- Prisma: Apache 2.0 License (https://prisma.io)
+- Socket.io: MIT License (https://socket.io)
+- shadcn/ui: MIT License (https://ui.shadcn.com)
+- Tailwind CSS: MIT License (https://tailwindcss.com)
+- Caddy: Apache 2.0 License (https://caddyserver.com)
+- Lucide Icons: ISC License (https://lucide.dev)
+- Framer Motion: MIT License (https://framer.com/motion)

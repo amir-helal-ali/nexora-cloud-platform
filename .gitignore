@@ -1,54 +1,101 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# ============================================================================
+# Nexora Cloud Platform — .gitignore
+# ============================================================================
+# IMPORTANT: Never commit .env files containing secrets!
+# ============================================================================
 
-# dependencies
-node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+.yarn/install-state.gz
+bun.lockb
 
-# testing
-/coverage
+# Build outputs
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
 
-# next.js
-/.next/
-/out/
+# Production
+*.tsbuildinfo
+next-env.d.ts
 
-# production
-/build
+# Environment files (NEVER commit these!)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.production
 
-# misc
-.DS_Store
-*.pem
+# Keep the example committed
+!.env.example
 
-# debug
+# Database files (runtime data)
+db/*.db
+db/*.db-journal
+db/*.db-wal
+db/*.db-shm
+
+# Logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
-
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
-.vercel
-
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-local-*
-.claude
-.z-ai-config
-*.log
 dev.log
-dev.out.log
-test
-prompt
+.zscripts/*.log
+mini-services/**/node_modules
+mini-services/**/bun.lock
+mini-services/**/.env
 
-server.log
-# Skills directory
-/skills/
+# Runtime data
+.pids
+*.seed
+*.pid.lock
+
+# Coverage
+coverage/
+.nyc_output/
+*.lcov
+
+# IDE & editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-workspace
+*.sublime-project
+
+# Docker (local volumes — should not be committed)
+docker/data/
+*.tar.gz
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Misc
+.claude/
+.bun/
+upload/
+download/
+
+# Keep these committed (do NOT ignore)
+!.github/
+!Dockerfile
+!Dockerfile.*
+!docker-compose*.yml
+!.dockerignore
+!README.md
+!LICENSE
+!CONTRIBUTING.md
+skills/EXCLUDE

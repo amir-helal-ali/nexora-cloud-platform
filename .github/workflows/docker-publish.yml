@@ -1,0 +1,185 @@
+# ============================================================================
+# Nexora Cloud Platform — Docker Image Publish
+# ============================================================================
+# Builds multi-arch images and pushes to GitHub Container Registry (GHCR).
+# Triggers on: release publish, main branch push (latest tag), version tags.
+# ============================================================================
+
+name: Docker Publish
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Image tag (e.g. v1.0.0)'
+        required: false
+        default: 'manual'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_DASHBOARD: nexora-cloud/dashboard
+  IMAGE_REALTIME: nexora-cloud/realtime
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Build & push dashboard image
+  # ---------------------------------------------------------------------------
+  dashboard:
+    name: Build & Push Dashboard
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐳 Set up QEMU (for multi-arch)
+        uses: docker/setup-qemu-action@v3
+
+      - name: 🐳 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🔑 Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🏷️ Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_DASHBOARD }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ github.event.inputs.version }},enable=${{ github.event_name == 'workflow_dispatch' }}
+          labels: |
+            org.opencontainers.image.title=Nexora Cloud Dashboard
+            org.opencontainers.image.description=Multi-runtime hosting platform
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.licenses=MIT
+
+      - name: 🏗️ Build & push dashboard
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: true
+          sbom: true
+
+      - name: ✅ Publish summary
+        run: |
+          echo "## 🐳 Dashboard Image Published" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Pull with:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_DASHBOARD }}:latest" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+  # ---------------------------------------------------------------------------
+  # Build & push realtime image
+  # ---------------------------------------------------------------------------
+  realtime:
+    name: Build & Push Realtime
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐳 Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: 🐳 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🔑 Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🏷️ Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_REALTIME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ github.event.inputs.version }},enable=${{ github.event_name == 'workflow_dispatch' }}
+          labels: |
+            org.opencontainers.image.title=Nexora Cloud Realtime Service
+            org.opencontainers.image.description=Socket.io WebSocket service
+
+      - name: 🏗️ Build & push realtime
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile.realtime
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: true
+          sbom: true
+
+  # ---------------------------------------------------------------------------
+  # Update Docker Hub description (optional, requires DOCKERHUB_TOKEN)
+  # ---------------------------------------------------------------------------
+  update-description:
+    name: Update README on GHCR
+    runs-on: ubuntu-latest
+    needs: [dashboard, realtime]
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      packages: write
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📝 Update container README
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ${{ env.REGISTRY }}
+          repository: ${{ env.IMAGE_DASHBOARD }}
+          readme-filepath: ./README.md

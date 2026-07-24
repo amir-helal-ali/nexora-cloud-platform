@@ -1,0 +1,12 @@
+# Nexora Cloud Platform Configuration
+# https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository
+
+# Branch protection is enforced via GitHub UI:
+# Settings → Branches → Branch protection rules
+
+# Recommended settings for `main`:
+# ✅ Require a pull request before merging
+# ✅ Require status checks to pass: CI (lint, build, docker-build)
+# ✅ Require conversation resolution before merging
+# ✅ Require linear history
+# ✅ Do not allow bypassing the above settings

@@ -1,0 +1,47 @@
+# ============================================================================
+# Nexora Cloud — Realtime WebSocket Service (standalone image)
+# ============================================================================
+# Use this image when you want to run the realtime service separately
+# from the Next.js dashboard (recommended for production scaling).
+# ============================================================================
+
+# ---- Stage 1: deps ----
+FROM node:24-alpine AS deps
+WORKDIR /app
+RUN npm install -g bun
+COPY mini-services/realtime-service/package.json mini-services/realtime-service/bun.lock* ./
+RUN bun install --frozen-lockfile
+
+# ---- Stage 2: runner ----
+FROM node:24-alpine AS runner
+LABEL org.opencontainers.image.title="Nexora Cloud — Realtime Service"
+LABEL org.opencontainers.image.description="Socket.io WebSocket service for live metrics & push notifications"
+
+RUN apk add --no-cache tini curl
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 realtime
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV REALTIME_PORT=3003
+ENV HOSTNAME=0.0.0.0
+
+# Copy realtime service + deps
+COPY --from=deps --chown=realtime:nodejs /app/node_modules ./node_modules
+COPY --chown=realtime:nodejs mini-services/realtime-service ./src
+
+# Copy restart wrapper
+COPY --chown=realtime:nodejs docker/realtime.sh /realtime.sh
+RUN chmod +x /realtime.sh
+
+USER realtime
+
+EXPOSE 3003
+
+# Health check for socket.io endpoint
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD curl -sf http://localhost:3003/ > /dev/null || exit 1
+
+ENTRYPOINT ["/sbin/tini", "--"]
+CMD ["/realtime.sh"]

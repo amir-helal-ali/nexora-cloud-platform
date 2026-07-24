@@ -1,0 +1,90 @@
+# ============================================================================
+# Nexora Cloud — Docker build context exclusions
+# ============================================================================
+# Anything listed here is NOT sent to the Docker daemon during build.
+# This dramatically speeds up builds by avoiding unnecessary file copies.
+# ============================================================================
+
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# Dependencies (we install fresh inside the container)
+node_modules
+**/node_modules
+.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# Build outputs (we build inside the container)
+.next
+out
+dist
+build
+*.tsbuildinfo
+
+# Next.js
+next-env.d.ts
+
+# Docker
+Dockerfile
+Dockerfile.*
+docker-compose*.yml
+.dockerignore
+
+# IDE & editors
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment files (NEVER bake secrets into images)
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dev.log
+.zscripts/*.log
+
+# Test files
+coverage
+.nyc_output
+tests/
+
+# Documentation (not needed at runtime)
+docs/
+*.md
+!README.md
+LICENSE
+
+# Database files (runtime data, not baked in)
+db/*.db
+db/*.db-journal
+
+# Download folder (local screenshots)
+download/
+
+# Skills folder (dev-only)
+skills/
+
+# Examples (dev reference)
+examples/
+
+# Z scripts (dev-only)
+.zscripts/
+
+# Bun cache
+.bun/
+
+# Misc
+.claude
+.zscripts
+TODO.md
