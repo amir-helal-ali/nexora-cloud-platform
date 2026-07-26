@@ -15,6 +15,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select'
 import { useRealtime } from '@/hooks/use-realtime'
+import { useI18n } from '@/hooks/use-i18n'
 import { Sparkline } from '@/components/nexora/sparkline'
 import { STATUS_META, fmtNum, fmtDate } from '@/lib/nexora'
 import { cn } from '@/lib/utils'
@@ -55,6 +56,7 @@ interface Notification {
 
 export function WebSocketsView() {
   const { metrics, sendPushTest } = useRealtime()
+  const { t } = useI18n()
   const [services, setServices] = useState<WebSocketService[]>([])
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(true)
@@ -116,10 +118,10 @@ export function WebSocketsView() {
         <div className="flex items-center justify-between">
           <TabsList>
             <TabsTrigger value="websockets" className="gap-1.5">
-              <Radio className="h-3.5 w-3.5" /> WebSocket Services
+              <Radio className="h-3.5 w-3.5" /> {t('nav.websockets')}
             </TabsTrigger>
             <TabsTrigger value="push" className="gap-1.5">
-              <BellRing className="h-3.5 w-3.5" /> Push Notifications
+              <BellRing className="h-3.5 w-3.5" /> {t('nav.notifications')}
             </TabsTrigger>
           </TabsList>
           {true && (
