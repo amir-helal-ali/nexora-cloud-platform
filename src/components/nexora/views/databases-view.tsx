@@ -17,6 +17,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useRealtime } from '@/hooks/use-realtime'
+import { useI18n } from '@/hooks/use-i18n'
 import { DB_ENGINE_META, STATUS_META, REGION_LABELS, fmtBytes, fmtDate } from '@/lib/nexora'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -57,6 +58,7 @@ const ENGINE_OPTIONS = [
 
 export function DatabasesView() {
   const { metrics } = useRealtime()
+  const { t } = useI18n()
   const [databases, setDatabases] = useState<Database[]>([])
   const [loading, setLoading] = useState(true)
   const [createOpen, setCreateOpen] = useState(false)
@@ -150,24 +152,24 @@ export function DatabasesView() {
       {/* Toolbar */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-sm font-semibold">Managed Databases</h2>
-          <p className="text-xs text-muted-foreground">{databases.length} instances · {databases.filter(d => d.status === 'running').length} running</p>
+          <h2 className="text-sm font-semibold">{t('databases.managedDatabases')}</h2>
+          <p className="text-xs text-muted-foreground">{databases.length} {t('databases.running')}</p>
         </div>
         <Dialog open={createOpen} onOpenChange={setCreateOpen}>
           <DialogTrigger asChild>
             <Button className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700">
               <Plus className="h-4 w-4" />
-              New Database
+              {t('databases.newDatabase')}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Create New Database</DialogTitle>
-              <DialogDescription>Choose an engine. We handle backups, scaling, SSL & high-availability.</DialogDescription>
+              <DialogTitle>{t('databases.createNewDatabase')}</DialogTitle>
+              <DialogDescription>{t('databases.createDbDesc')}</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-2">
               <div>
-                <Label className="text-xs font-medium">Database Name</Label>
+                <Label className="text-xs font-medium">{t('databases.databaseName')}</Label>
                 <Input
                   value={newDb.name}
                   onChange={(e) => setNewDb({ ...newDb, name: e.target.value })}
@@ -176,7 +178,7 @@ export function DatabasesView() {
                 />
               </div>
               <div>
-                <Label className="text-xs font-medium">Engine</Label>
+                <Label className="text-xs font-medium">{t('databases.engine')}</Label>
                 <div className="mt-2 grid grid-cols-2 gap-2">
                   {ENGINE_OPTIONS.map(opt => (
                     <button
@@ -214,7 +216,7 @@ export function DatabasesView() {
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-xs font-medium">Size (GB)</Label>
+                  <Label className="text-xs font-medium">{t('databases.size')}</Label>
                   <Select value={String(newDb.size)} onValueChange={(v) => setNewDb({ ...newDb, size: Number(v) })}>
                     <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -276,20 +278,20 @@ export function DatabasesView() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
                     <DropdownMenuItem onClick={() => copyConnString(db)}>
-                      <Copy className="h-3.5 w-3.5" /> Copy connection string
+                      <Copy className="h-3.5 w-3.5" /> {t('databases.copyConnection')}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => handleToggleStatus(db)}>
-                      {db.status === 'running' ? 'Stop' : 'Start'}
+                      {db.status === 'running' ? t('apps.stop') : t('apps.start')}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => toast.info('Backup started', { description: `${db.name} backup queued` })}>
-                      <Shield className="h-3.5 w-3.5" /> Trigger backup
+                    <DropdownMenuItem onClick={() => toast.info(t('databases.backupStarted'), { description: `${db.name} ${t('databases.backupQueued').replace('{name}', '')}` })}>
+                      <Shield className="h-3.5 w-3.5" /> {t('databases.triggerBackup')}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={() => handleDelete(db)}
                       className="text-rose-600 dark:text-rose-400"
                     >
-                      <Trash2 className="h-3.5 w-3.5" /> Delete
+                      <Trash2 className="h-3.5 w-3.5" /> {t('common.delete')}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -319,7 +321,7 @@ export function DatabasesView() {
                 {/* Storage */}
                 <div>
                   <div className="mb-1 flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">Storage</span>
+                    <span className="text-muted-foreground">{t('databases.storage')}</span>
                     <span className="font-semibold tabular-nums">{fmtBytes(db.usedMb)} / {db.size} GB</span>
                   </div>
                   <Progress value={usedPct} className="h-1.5" />
@@ -328,7 +330,7 @@ export function DatabasesView() {
                 {/* Connections */}
                 <div>
                   <div className="mb-1 flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">Connections</span>
+                    <span className="text-muted-foreground">{t('databases.connections')}</span>
                     <span className="font-semibold tabular-nums">{conns} / {db.maxConnections}</span>
                   </div>
                   <Progress value={connPct} className="h-1.5" />
@@ -337,15 +339,15 @@ export function DatabasesView() {
                 {/* Host info */}
                 <div className="grid grid-cols-1 gap-1 rounded-md border border-border/40 p-2 text-[11px]">
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Host</span>
+                    <span className="text-muted-foreground">{t('databases.host')}</span>
                     <code className="truncate font-mono text-[10px]">{db.host}</code>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Port</span>
+                    <span className="text-muted-foreground">{t('databases.port')}</span>
                     <code className="font-mono">{db.port}</code>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Last backup</span>
+                    <span className="text-muted-foreground">{t('databases.lastBackup')}</span>
                     <span>{fmtDate(db.lastBackup)}</span>
                   </div>
                 </div>
@@ -359,7 +361,7 @@ export function DatabasesView() {
                   className="h-7 gap-1 px-2 text-xs"
                   onClick={() => copyConnString(db)}
                 >
-                  <Copy className="h-3 w-3" /> Connection
+                  <Copy className="h-3 w-3" /> {t('databases.connectionString')}
                 </Button>
                 <Button size="sm" variant="ghost" className="h-7 px-2">
                   <ChevronRight className="h-3.5 w-3.5" />
