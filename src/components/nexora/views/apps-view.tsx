@@ -18,6 +18,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useRealtime } from '@/hooks/use-realtime'
+import { useI18n } from '@/hooks/use-i18n'
 import { RUNTIME_META, STATUS_META, REGION_LABELS, fmtNum, fmtDate, fmtBytes } from '@/lib/nexora'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -60,6 +61,7 @@ const RUNTIME_OPTIONS = [
 
 export function AppsView() {
   const { metrics, deployApp, restartApp, toggleApp, appStatusEvents } = useRealtime()
+  const { t } = useI18n()
   const [apps, setApps] = useState<App[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -178,7 +180,7 @@ export function AppsView() {
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search applications..."
+              placeholder={t('apps.searchApps')}
               className="h-9 pl-9"
             />
           </div>
@@ -213,17 +215,17 @@ export function AppsView() {
           <DialogTrigger asChild>
             <Button className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700">
               <Plus className="h-4 w-4" />
-              New Application
+              {t('apps.newApplication')}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Deploy New Application</DialogTitle>
-              <DialogDescription>Choose a runtime and we'll spin up an isolated container with auto-scaling, SSL, and global CDN.</DialogDescription>
+              <DialogTitle>{t('apps.deployNewApplication')}</DialogTitle>
+              <DialogDescription>{t('apps.deployNewAppDesc')}</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-2">
               <div>
-                <Label className="text-xs font-medium">Application Name</Label>
+                <Label className="text-xs font-medium">{t('apps.applicationName')}</Label>
                 <Input
                   value={newApp.name}
                   onChange={(e) => setNewApp({ ...newApp, name: e.target.value })}
@@ -232,7 +234,7 @@ export function AppsView() {
                 />
               </div>
               <div>
-                <Label className="text-xs font-medium">Runtime</Label>
+                <Label className="text-xs font-medium">{t('apps.runtime')}</Label>
                 <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
                   {RUNTIME_OPTIONS.map(opt => (
                     <button
@@ -258,7 +260,7 @@ export function AppsView() {
                 </div>
               </div>
               <div>
-                <Label className="text-xs font-medium">Region</Label>
+                <Label className="text-xs font-medium">{t('apps.region')}</Label>
                 <Select value={newApp.region} onValueChange={(v) => setNewApp({ ...newApp, region: v })}>
                   <SelectTrigger className="mt-1.5">
                     <SelectValue />
@@ -272,10 +274,10 @@ export function AppsView() {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setCreateOpen(false)}>{t('common.cancel')}</Button>
               <Button onClick={handleCreate} className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700">
                 <Rocket className="h-4 w-4" />
-                Deploy Now
+                {t('apps.deployNow')}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -330,27 +332,27 @@ export function AppsView() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-44">
                       <DropdownMenuItem onClick={() => handleAction(app, 'deploy')}>
-                        <Rocket className="h-3.5 w-3.5" /> Deploy
+                        <Rocket className="h-3.5 w-3.5" /> {t('apps.deploy')}
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleAction(app, 'restart')}>
-                        <RotateCw className="h-3.5 w-3.5" /> Restart
+                        <RotateCw className="h-3.5 w-3.5" /> {t('apps.restart')}
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleAction(app, 'toggle')}>
                         {app.status === 'running' ? (
-                          <><Square className="h-3.5 w-3.5" /> Stop</>
+                          <><Square className="h-3.5 w-3.5" /> {t('apps.stop')}</>
                         ) : (
-                          <><Play className="h-3.5 w-3.5" /> Start</>
+                          <><Play className="h-3.5 w-3.5" /> {t('apps.start')}</>
                         )}
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => setSelected(app)}>
-                        <Settings className="h-3.5 w-3.5" /> Settings
+                        <Settings className="h-3.5 w-3.5" /> {t('apps.settings')}
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={() => handleAction(app, 'delete')}
                         className="text-rose-600 dark:text-rose-400"
                       >
-                        <Trash2 className="h-3.5 w-3.5" /> Delete
+                        <Trash2 className="h-3.5 w-3.5" /> {t('apps.delete')}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -397,7 +399,7 @@ export function AppsView() {
                   {/* Resource info */}
                   <div className="grid grid-cols-2 gap-2 text-[11px]">
                     <div className="flex items-center justify-between rounded-md border border-border/40 px-2 py-1">
-                      <span className="text-muted-foreground">Instances</span>
+                      <span className="text-muted-foreground">{t('apps.instances')}</span>
                       <span className="font-semibold tabular-nums">{app.instances}</span>
                     </div>
                     <div className="flex items-center justify-between rounded-md border border-border/40 px-2 py-1">
@@ -405,11 +407,11 @@ export function AppsView() {
                       <span className="font-semibold tabular-nums">{app.cpuLimit}c / {fmtBytes(app.memoryLimit)}</span>
                     </div>
                     <div className="flex items-center justify-between rounded-md border border-border/40 px-2 py-1">
-                      <span className="text-muted-foreground">Env vars</span>
+                      <span className="text-muted-foreground">{t('apps.envVars')}</span>
                       <span className="font-semibold tabular-nums">{app.envCount}</span>
                     </div>
                     <div className="flex items-center justify-between rounded-md border border-border/40 px-2 py-1">
-                      <span className="text-muted-foreground">Auto-scale</span>
+                      <span className="text-muted-foreground">{t('apps.autoScale')}</span>
                       <span className={cn('font-semibold', app.autoScale ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground')}>
                         {app.autoScale ? 'On' : 'Off'}
                       </span>
@@ -420,7 +422,7 @@ export function AppsView() {
                 {/* Footer */}
                 <div className="flex items-center justify-between gap-2 border-t border-border/60 bg-muted/20 px-4 py-2.5">
                   <span className="text-[10px] text-muted-foreground">
-                    {app.lastDeploy ? `Deployed ${fmtDate(app.lastDeploy)}` : 'No deployments yet'}
+                    {app.lastDeploy ? `${t('apps.deployed')} ${fmtDate(app.lastDeploy)}` : t('apps.noDeployments')}
                   </span>
                   <div className="flex gap-1">
                     <Button
