@@ -1,21 +1,15 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useLanguage, type Locale } from '@/lib/language-store'
 
-// Cache of loaded message bundles
-const messageCache: Partial<Record<Locale, Record<string, any>>> = {}
+// Import messages statically — Next.js bundles them at build time
+import arMessages from '@/i18n/messages/ar.json'
+import enMessages from '@/i18n/messages/en.json'
 
-async function loadMessages(locale: Locale): Promise<Record<string, any>> {
-  if (messageCache[locale]) return messageCache[locale]!
-  try {
-    const mod = await import(`@/i18n/messages/${locale}.json`)
-    messageCache[locale] = mod.default || mod
-    return messageCache[locale]!
-  } catch (e) {
-    console.error(`Failed to load messages for ${locale}`, e)
-    return {}
-  }
+const MESSAGES: Record<Locale, Record<string, any>> = {
+  ar: arMessages,
+  en: enMessages,
 }
 
 // Resolve a dotted path like "nav.overview" against a nested object
@@ -32,21 +26,17 @@ function get(obj: any, path: string): string {
 // Simple ICU-like {var} interpolation
 function interpolate(template: string, vars?: Record<string, string | number>): string {
   if (!vars) return template
-  return template.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? `{${k}}`))
+  return template.replace(/\{(\w+)\}/g, (_, k) => {
+    const v = vars[k]
+    return v !== undefined ? String(v) : `{${k}}`
+  })
 }
 
 export function useI18n() {
   const locale = useLanguage((s) => s.locale)
-  const [messages, setMessages] = useState<Record<string, any>>(messageCache[locale] || {})
+  const messages = MESSAGES[locale] || MESSAGES.en
 
-  useEffect(() => {
-    let cancelled = false
-    loadMessages(locale).then((m) => {
-      if (!cancelled) setMessages(m)
-    })
-    return () => { cancelled = true }
-  }, [locale])
-
+  // Recreate `t` whenever messages change — no memoization issues with stale closures
   const t = (key: string, vars?: Record<string, string | number>): string => {
     const tmpl = get(messages, key)
     return interpolate(tmpl, vars)

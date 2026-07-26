@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRealtime } from '@/hooks/use-realtime'
+import { useI18n } from '@/hooks/use-i18n'
 import { StatCard } from '@/components/nexora/stat-card'
 import { Sparkline } from '@/components/nexora/sparkline'
 import { Card } from '@/components/ui/card'
@@ -55,6 +56,7 @@ interface Stats {
 export function OverviewView() {
   const { metrics, appStatusEvents } = useRealtime()
   const { setView } = useNexoraStore()
+  const { t } = useI18n()
   const [stats, setStats] = useState<Stats | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -96,26 +98,28 @@ export function OverviewView() {
           <div>
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
-                <span className="mr-1.5 h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                All systems operational
+                <span className="me-1.5 h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                {t('overview.allSystemsOperational')}
               </Badge>
-              <span className="text-xs text-muted-foreground">Last updated {fmtDate(new Date())}</span>
+              <span className="text-xs text-muted-foreground">{t('common.lastUpdated')} {fmtDate(new Date())}</span>
             </div>
-            <h2 className="mt-3 text-2xl font-bold tracking-tight">Welcome back, Ahmed</h2>
+            <h2 className="mt-3 text-2xl font-bold tracking-tight">{t('overview.welcome')}</h2>
             <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-              Your fleet is running smoothly across <span className="font-medium text-foreground">3 regions</span> with{' '}
-              <span className="font-medium text-foreground">{s.totalInstances} active instances</span> handling{' '}
-              <span className="font-medium text-foreground">{fmtNum(metrics?.totals.totalRps || s.totalWsMsgPerSec)} requests/sec</span> in real-time.
+              {t('overview.welcomeMessage', {
+                regions: '3',
+                instances: String(s.totalInstances),
+                rps: fmtNum(metrics?.totals.totalRps || s.totalWsMsgPerSec),
+              })}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" size="sm" onClick={() => setView('deployments')}>
               <GitCommit className="h-4 w-4" />
-              View deployments
+              {t('overview.viewDeployments')}
             </Button>
             <Button size="sm" className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700" onClick={() => setView('apps')}>
               <Zap className="h-4 w-4" />
-              Deploy new app
+              {t('overview.deployNewApp')}
             </Button>
           </div>
         </div>
@@ -124,41 +128,41 @@ export function OverviewView() {
       {/* Top stat cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          label="Running Apps"
+          label={t('overview.runningApps')}
           value={s.runningApps}
           unit={`/ ${s.totalApps}`}
           icon={Boxes}
           color="emerald"
           delta={2.4}
           spark={cpuHistory}
-          sub={`${s.totalInstances} instances · ${s.totalCpuCores} vCPU`}
+          sub={`${s.totalInstances} ${t('overview.instances')} · ${s.totalCpuCores} vCPU`}
         />
         <StatCard
-          label="Requests / sec"
+          label={t('overview.requestsPerSec')}
           value={fmtNum(metrics?.totals.totalRps || 0)}
           icon={Activity}
           color="sky"
           delta={8.2}
           spark={rpsHistory}
-          sub="Across all runtimes"
+          sub={t('overview.apps')}
         />
         <StatCard
-          label="WebSocket Connections"
+          label={t('overview.websocketConnections')}
           value={fmtNum(s.totalWsConnections + (metrics?.totals.totalConnections || 0))}
           icon={Radio}
           color="violet"
           delta={4.7}
           spark={netHistory}
-          sub={`${s.totalWsMsgPerSec} msg/sec live`}
+          sub={`${s.totalWsMsgPerSec} ${t('overview.msgPerSec')}`}
         />
         <StatCard
-          label="Storage Used"
+          label={t('overview.storageUsed')}
           value={fmtBytes(metrics?.totals.storageUsedMb || s.storageUsedMb)}
           unit={`/ ${fmtBytes(metrics?.totals.storageTotalMb || s.storageTotalMb)}`}
           icon={HardDrive}
           color="amber"
           delta={1.3}
-          sub={`${s.totalDatabases} databases active`}
+          sub={`${s.totalDatabases} ${t('overview.dbs')}`}
         />
       </div>
 
@@ -168,8 +172,8 @@ export function OverviewView() {
         <Card className="p-5 lg:col-span-2">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-semibold">Fleet Performance</h3>
-              <p className="text-xs text-muted-foreground">CPU & memory utilization · last 60 ticks</p>
+              <h3 className="text-sm font-semibold">{t('overview.fleetPerformance')}</h3>
+              <p className="text-xs text-muted-foreground">{t('overview.fleetPerformanceDesc')}</p>
             </div>
             <div className="flex gap-3 text-xs">
               <div className="flex items-center gap-1.5">
@@ -179,21 +183,21 @@ export function OverviewView() {
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-sky-500" />
-                <span className="text-muted-foreground">Memory</span>
+                <span className="text-muted-foreground">{t('overview.memoryAverage').split(' ')[0]}</span>
                 <span className="font-semibold tabular-nums">{(memHistory[memHistory.length - 1] || 0).toFixed(1)}%</span>
               </div>
             </div>
           </div>
           <div className="mt-4 grid grid-cols-2 gap-4">
             <div className="rounded-md border border-emerald-500/20 bg-emerald-500/5 p-3">
-              <div className="mb-1 text-xs text-muted-foreground">CPU Average</div>
+              <div className="mb-1 text-xs text-muted-foreground">{t('overview.cpuAverage')}</div>
               <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
                 {(cpuHistory[cpuHistory.length - 1] || 0).toFixed(1)}<span className="text-base">%</span>
               </div>
               <Sparkline values={cpuHistory} color="#10b981" width={300} height={48} className="mt-2 w-full" />
             </div>
             <div className="rounded-md border border-sky-500/20 bg-sky-500/5 p-3">
-              <div className="mb-1 text-xs text-muted-foreground">Memory Average</div>
+              <div className="mb-1 text-xs text-muted-foreground">{t('overview.memoryAverage')}</div>
               <div className="text-2xl font-bold text-sky-600 dark:text-sky-400 tabular-nums">
                 {(memHistory[memHistory.length - 1] || 0).toFixed(1)}<span className="text-base">%</span>
               </div>
@@ -202,15 +206,15 @@ export function OverviewView() {
           </div>
           <div className="mt-3 grid grid-cols-3 gap-3 border-t pt-3">
             <div>
-              <div className="text-xs text-muted-foreground">Total vCPU</div>
-              <div className="text-sm font-semibold">{s.totalCpuCores} cores</div>
+              <div className="text-xs text-muted-foreground">{t('overview.totalCpu')}</div>
+              <div className="text-sm font-semibold">{s.totalCpuCores} {t('overview.cores')}</div>
             </div>
             <div>
-              <div className="text-xs text-muted-foreground">Total Memory</div>
+              <div className="text-xs text-muted-foreground">{t('overview.totalMemory')}</div>
               <div className="text-sm font-semibold">{(s.totalMemoryMb / 1024).toFixed(1)} GB</div>
             </div>
             <div>
-              <div className="text-xs text-muted-foreground">Bandwidth</div>
+              <div className="text-xs text-muted-foreground">{t('overview.bandwidth')}</div>
               <div className="text-sm font-semibold">{fmtNum(netHistory[netHistory.length - 1] || 0)} KB/s</div>
             </div>
           </div>
@@ -218,8 +222,8 @@ export function OverviewView() {
 
         {/* Runtime breakdown */}
         <Card className="p-5">
-          <h3 className="text-sm font-semibold">Runtime Distribution</h3>
-          <p className="text-xs text-muted-foreground">Apps by language</p>
+          <h3 className="text-sm font-semibold">{t('overview.runtimeDistribution')}</h3>
+          <p className="text-xs text-muted-foreground">{t('overview.runtimeDistributionDesc')}</p>
           <div className="mt-4 space-y-3">
             {Object.entries(s.runtimeBreakdown).map(([rt, count]) => {
               const meta = RUNTIME_META[rt] || RUNTIME_META.node
@@ -232,7 +236,7 @@ export function OverviewView() {
                       <span className="text-sm">{meta.icon}</span>
                       <span className="font-medium">{meta.label}</span>
                     </div>
-                    <span className="text-muted-foreground">{count} apps</span>
+                    <span className="text-muted-foreground">{count} {t('overview.apps')}</span>
                   </div>
                   <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-muted">
                     <div className={cn('h-full rounded-full', barColor)} style={{ width: `${pct}%` }} />
@@ -242,7 +246,7 @@ export function OverviewView() {
             })}
           </div>
           <div className="mt-4 border-t pt-3">
-            <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Multi-Runtime Support</div>
+            <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('overview.multiRuntimeSupport')}</div>
             <div className="flex flex-wrap gap-1.5">
               {Object.entries(RUNTIME_META).map(([rt, meta]) => (
                 <Badge key={rt} variant="outline" className={cn('gap-1 text-[10px]', meta.bg, meta.color)}>
@@ -259,11 +263,11 @@ export function OverviewView() {
       <Card className="p-5">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-semibold">Live Application Fleet</h3>
-            <p className="text-xs text-muted-foreground">Real-time metrics from running services</p>
+            <h3 className="text-sm font-semibold">{t('overview.liveApplicationFleet')}</h3>
+            <p className="text-xs text-muted-foreground">{t('overview.liveApplicationFleetDesc')}</p>
           </div>
           <Button variant="ghost" size="sm" onClick={() => setView('apps')}>
-            View all <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
+            {t('overview.viewAll')} <ArrowUpRight className="ms-1 h-3.5 w-3.5" />
           </Button>
         </div>
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
@@ -321,11 +325,11 @@ export function OverviewView() {
         <Card className="p-5 lg:col-span-2">
           <div className="mb-4 flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-semibold">Recent Activity</h3>
-              <p className="text-xs text-muted-foreground">Latest events across your fleet</p>
+              <h3 className="text-sm font-semibold">{t('overview.recentActivity')}</h3>
+              <p className="text-xs text-muted-foreground">{t('overview.recentActivityDesc')}</p>
             </div>
             <Button variant="ghost" size="sm" onClick={() => setView('logs')}>
-              View logs <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
+              {t('overview.viewLogs')} <ArrowUpRight className="ms-1 h-3.5 w-3.5" />
             </Button>
           </div>
           <ScrollArea className="h-[360px]">
@@ -362,7 +366,7 @@ export function OverviewView() {
         <div className="space-y-4">
           <Card className="p-5">
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-sm font-semibold">Domains & SSL</h3>
+              <h3 className="text-sm font-semibold">{t('overview.domainsSsl')}</h3>
               <Button variant="ghost" size="sm" onClick={() => setView('domains')}>
                 <ArrowUpRight className="h-3.5 w-3.5" />
               </Button>
@@ -371,28 +375,28 @@ export function OverviewView() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm">
                   <Globe className="h-4 w-4 text-muted-foreground" />
-                  <span>Total domains</span>
+                  <span>{t('overview.totalDomains')}</span>
                 </div>
                 <span className="font-semibold tabular-nums">{s.totalDomains}</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm">
                   <Shield className="h-4 w-4 text-emerald-500" />
-                  <span>SSL active</span>
+                  <span>{t('overview.sslActive')}</span>
                 </div>
                 <span className="font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">{s.sslActive}</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm">
                   <Shield className="h-4 w-4 text-amber-500" />
-                  <span>Expiring soon</span>
+                  <span>{t('overview.expiringSoon')}</span>
                 </div>
                 <span className="font-semibold tabular-nums text-amber-600 dark:text-amber-400">{s.sslExpiringSoon}</span>
               </div>
             </div>
             <div className="mt-3 border-t pt-3">
               <div className="mb-1.5 flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">SSL coverage</span>
+                <span className="text-muted-foreground">{t('overview.sslCoverage')}</span>
                 <span className="font-semibold">{((s.sslActive / s.totalDomains) * 100).toFixed(0)}%</span>
               </div>
               <Progress value={(s.sslActive / s.totalDomains) * 100} className="h-1.5" />
@@ -401,7 +405,7 @@ export function OverviewView() {
 
           <Card className="p-5">
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-sm font-semibold">Team</h3>
+              <h3 className="text-sm font-semibold">{t('overview.team')}</h3>
               <Button variant="ghost" size="sm" onClick={() => setView('team')}>
                 <ArrowUpRight className="h-3.5 w-3.5" />
               </Button>
@@ -424,11 +428,11 @@ export function OverviewView() {
             </div>
             <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
               <div className="rounded-md bg-emerald-500/10 px-2 py-1.5">
-                <div className="text-[10px] text-muted-foreground">Active</div>
+                <div className="text-[10px] text-muted-foreground">{t('overview.active')}</div>
                 <div className="font-bold text-emerald-600 dark:text-emerald-400">{s.activeMembers}</div>
               </div>
               <div className="rounded-md bg-amber-500/10 px-2 py-1.5">
-                <div className="text-[10px] text-muted-foreground">Pending</div>
+                <div className="text-[10px] text-muted-foreground">{t('overview.pending')}</div>
                 <div className="font-bold text-amber-600 dark:text-amber-400">{s.pendingMembers}</div>
               </div>
             </div>
@@ -436,7 +440,7 @@ export function OverviewView() {
 
           <Card className="p-5">
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-sm font-semibold">WebSocket Services</h3>
+              <h3 className="text-sm font-semibold">{t('overview.websocketServices')}</h3>
               <Button variant="ghost" size="sm" onClick={() => setView('websockets')}>
                 <ArrowUpRight className="h-3.5 w-3.5" />
               </Button>
@@ -445,21 +449,21 @@ export function OverviewView() {
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
                   <Radio className="h-4 w-4 text-violet-500" />
-                  <span>Endpoints</span>
+                  <span>{t('overview.endpoints')}</span>
                 </div>
                 <span className="font-semibold tabular-nums">{s.totalWebsockets}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
                   <Network className="h-4 w-4 text-sky-500" />
-                  <span>Connections</span>
+                  <span>{t('overview.connections')}</span>
                 </div>
                 <span className="font-semibold tabular-nums">{fmtNum(s.totalWsConnections)}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
                   <Activity className="h-4 w-4 text-emerald-500" />
-                  <span>Msg / sec</span>
+                  <span>{t('overview.msgPerSec')}</span>
                 </div>
                 <span className="font-semibold tabular-nums">{s.totalWsMsgPerSec}</span>
               </div>

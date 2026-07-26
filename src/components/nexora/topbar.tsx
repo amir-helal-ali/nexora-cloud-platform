@@ -37,9 +37,9 @@ export function Topbar() {
 
   // Build VIEW_TITLES dynamically from i18n
   const VIEW_TITLES: Record<string, { titleKey: string; subtitleKey: string }> = {
-    overview: { titleKey: 'nav.overview', subtitleKey: 'overview.welcomeMessage' },
+    overview: { titleKey: 'nav.overview', subtitleKey: 'overview.fleetPerformanceDesc' },
     apps: { titleKey: 'apps.title', subtitleKey: 'apps.subtitle' },
-    pipelines: { titleKey: 'nav.pipelines', subtitleKey: 'apps.subtitle' },
+    pipelines: { titleKey: 'nav.pipelines', subtitleKey: 'nav.pipelinesDesc' },
     analytics: { titleKey: 'nav.analytics', subtitleKey: 'nav.analyticsDesc' },
     simulator: { titleKey: 'nav.simulator', subtitleKey: 'nav.simulatorDesc' },
     gateway: { titleKey: 'nav.gateway', subtitleKey: 'nav.gatewayDesc' },
