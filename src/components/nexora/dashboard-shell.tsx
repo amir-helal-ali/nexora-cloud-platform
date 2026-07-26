@@ -6,6 +6,8 @@ import { Topbar } from './topbar'
 import { PushToaster } from './push-toaster'
 import { useNexoraStore } from '@/lib/store'
 import { useRealtime } from '@/hooks/use-realtime'
+import { useLanguage } from '@/lib/language-store'
+import { useI18n } from '@/hooks/use-i18n'
 import { cn } from '@/lib/utils'
 
 import { OverviewView } from './views/overview-view'
@@ -36,6 +38,9 @@ import { CommandPalette } from './command-palette'
 export function DashboardShell() {
   const { view, sidebarOpen } = useNexoraStore()
   const { connected } = useRealtime()
+  const { isRTL } = useLanguage()
+  const { t } = useI18n()
+  const rtl = isRTL()
 
   // Close sidebar on view change for mobile
   useEffect(() => {
@@ -43,6 +48,11 @@ export function DashboardShell() {
       useNexoraStore.setState({ sidebarOpen: false })
     }
   }, [view])
+
+  // Padding direction: in RTL use pe-72 (padding-inline-end), in LTR use pl-72
+  const paddingClass = rtl
+    ? (sidebarOpen ? 'lg:pe-72' : 'lg:pe-0')
+    : (sidebarOpen ? 'lg:pl-72' : 'lg:pl-0')
 
   return (
     <div className="relative min-h-screen bg-background">
@@ -56,7 +66,7 @@ export function DashboardShell() {
       <Sidebar />
 
       {/* Main */}
-      <div className={cn('flex min-h-screen flex-col transition-all duration-300', sidebarOpen ? 'lg:pl-72' : 'lg:pl-0')}>
+      <div className={cn('flex min-h-screen flex-col transition-all duration-300', paddingClass)}>
         <Topbar />
         <main className="flex-1 p-4 lg:p-6">
           <div className="mx-auto max-w-7xl">
@@ -90,17 +100,17 @@ export function DashboardShell() {
         <footer className="mt-auto border-t border-border/60 bg-card/30 px-6 py-4">
           <div className="mx-auto flex max-w-7xl flex-col gap-2 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <span>© 2026 Nexora Cloud Platform</span>
+              <span>{t('footer.copyright')}</span>
               <span>·</span>
               <span className="flex items-center gap-1.5">
                 <span className={cn('h-1.5 w-1.5 rounded-full', connected ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500')} />
-                {connected ? 'Realtime connected' : 'Reconnecting...'}
+                {connected ? t('footer.realtimeConnected') : t('footer.reconnecting')}
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <a href="#" className="hover:text-foreground">Documentation</a>
-              <a href="#" className="hover:text-foreground">Status</a>
-              <a href="#" className="hover:text-foreground">Support</a>
+              <a href="#" className="hover:text-foreground">{t('footer.documentation')}</a>
+              <a href="#" className="hover:text-foreground">{t('footer.status')}</a>
+              <a href="#" className="hover:text-foreground">{t('footer.support')}</a>
               <span>·</span>
               <span>v2.4.1</span>
             </div>

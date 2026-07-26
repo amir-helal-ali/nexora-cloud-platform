@@ -6,8 +6,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { ThemeToggle, LiveStatusBadge } from './brand'
+import { LanguageToggle } from './language-toggle'
 import { useNexoraStore } from '@/lib/store'
 import { useRealtime } from '@/hooks/use-realtime'
+import { useI18n } from '@/hooks/use-i18n'
 import { cn } from '@/lib/utils'
 import { fmtDate } from '@/lib/nexora'
 import {
@@ -16,7 +18,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
@@ -27,49 +28,39 @@ const NOTIF_COLORS: Record<string, string> = {
   error: 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-300',
 }
 
-const VIEW_TITLES: Record<string, { title: string; subtitle: string }> = {
-  overview: { title: 'Overview', subtitle: 'Real-time fleet monitoring across all regions' },
-  apps: { title: 'Applications', subtitle: 'Multi-runtime deployments: Rust, PHP, Next.js, Node' },
-  pipelines: { title: 'CI/CD Pipelines', subtitle: 'Build, test, and deploy from Git with full visibility' },
-  analytics: { title: 'Analytics', subtitle: 'Traffic, performance, geography & device insights' },
-  simulator: { title: 'Scaling Simulator', subtitle: 'Test how your fleet responds to traffic changes' },
-  gateway: { title: 'API Gateway', subtitle: 'Routing, rate limiting, auth & middleware for every endpoint' },
-  flags: { title: 'Feature Flags', subtitle: 'Progressive rollout, A/B testing & targeting rules' },
-  mesh: { title: 'Service Mesh', subtitle: 'Network topology, traffic policies & distributed tracing' },
-  databases: { title: 'Databases', subtitle: 'Managed SQL, NoSQL, and in-memory stores' },
-  websockets: { title: 'WebSocket Services', subtitle: 'Persistent realtime endpoints & channels' },
-  notifications: { title: 'Push Notifications', subtitle: 'In-app, email, webhook & Web Push delivery' },
-  backups: { title: 'Backups & Snapshots', subtitle: 'Automatic and manual backups with point-in-time restore' },
-  secrets: { title: 'Secrets Manager', subtitle: 'Encrypted environment variables, certificates & API keys' },
-  cdn: { title: 'CDN & Edge Network', subtitle: '12 global PoPs with Anycast routing & cache management' },
-  monitoring: { title: 'Monitoring & Alerts', subtitle: 'Real-time alerting on custom metric thresholds' },
-  audit: { title: 'Audit Log', subtitle: 'Immutable event log with 7-year retention & SIEM streaming' },
-  domains: { title: 'Domains & SSL', subtitle: 'DNS management & automatic certificate renewal' },
-  deployments: { title: 'Deployments', subtitle: 'CI/CD pipeline history & rollback' },
-  logs: { title: 'Logs', subtitle: 'Live streaming logs across all services' },
-  marketplace: { title: 'Marketplace', subtitle: 'One-click integrations with 28+ services & tools' },
-  billing: { title: 'Billing', subtitle: 'Plan, usage, invoices & payment methods' },
-  team: { title: 'Team', subtitle: 'Members, roles & access control' },
-  settings: { title: 'Settings', subtitle: 'Account, billing & platform configuration' },
-}
-
 export function Topbar() {
   const { view, toggleSidebar, setView } = useNexoraStore()
   const { pushNotifications, dismissNotification } = useRealtime()
+  const { t } = useI18n()
   const [search, setSearch] = useState('')
   const searchRef = useRef<HTMLInputElement>(null)
 
-  // Cmd+K to open command palette
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault()
-        document.dispatchEvent(new CustomEvent('open-command-palette'))
-      }
-    }
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
-  }, [])
+  // Build VIEW_TITLES dynamically from i18n
+  const VIEW_TITLES: Record<string, { titleKey: string; subtitleKey: string }> = {
+    overview: { titleKey: 'nav.overview', subtitleKey: 'overview.welcomeMessage' },
+    apps: { titleKey: 'apps.title', subtitleKey: 'apps.subtitle' },
+    pipelines: { titleKey: 'nav.pipelines', subtitleKey: 'apps.subtitle' },
+    analytics: { titleKey: 'nav.analytics', subtitleKey: 'nav.analyticsDesc' },
+    simulator: { titleKey: 'nav.simulator', subtitleKey: 'nav.simulatorDesc' },
+    gateway: { titleKey: 'nav.gateway', subtitleKey: 'nav.gatewayDesc' },
+    flags: { titleKey: 'nav.flags', subtitleKey: 'nav.flagsDesc' },
+    mesh: { titleKey: 'nav.mesh', subtitleKey: 'nav.meshDesc' },
+    databases: { titleKey: 'databases.title', subtitleKey: 'databases.subtitle' },
+    websockets: { titleKey: 'nav.websockets', subtitleKey: 'nav.websocketsDesc' },
+    notifications: { titleKey: 'notifications.title', subtitleKey: 'notifications.subtitle' },
+    backups: { titleKey: 'nav.backups', subtitleKey: 'nav.backupsDesc' },
+    secrets: { titleKey: 'nav.secrets', subtitleKey: 'nav.secretsDesc' },
+    cdn: { titleKey: 'nav.cdn', subtitleKey: 'nav.cdnDesc' },
+    monitoring: { titleKey: 'nav.monitoring', subtitleKey: 'nav.monitoringDesc' },
+    audit: { titleKey: 'nav.audit', subtitleKey: 'nav.auditDesc' },
+    marketplace: { titleKey: 'nav.marketplace', subtitleKey: 'nav.marketplaceDesc' },
+    billing: { titleKey: 'nav.billing', subtitleKey: 'nav.billingDesc' },
+    domains: { titleKey: 'nav.domains', subtitleKey: 'nav.domainsDesc' },
+    deployments: { titleKey: 'nav.deployments', subtitleKey: 'nav.deploymentsDesc' },
+    logs: { titleKey: 'nav.logs', subtitleKey: 'nav.logsDesc' },
+    team: { titleKey: 'nav.team', subtitleKey: 'nav.teamDesc' },
+    settings: { titleKey: 'nav.settingsNav', subtitleKey: 'nav.settingsDesc' },
+  }
 
   const meta = VIEW_TITLES[view] || VIEW_TITLES.overview
   const unread = pushNotifications.length
@@ -86,8 +77,8 @@ export function Topbar() {
       </Button>
 
       <div className="flex flex-1 flex-col gap-0 lg:min-w-0">
-        <h1 className="text-base font-bold leading-tight tracking-tight lg:text-lg">{meta.title}</h1>
-        <p className="hidden truncate text-xs text-muted-foreground lg:block">{meta.subtitle}</p>
+        <h1 className="text-base font-bold leading-tight tracking-tight lg:text-lg">{t(meta.titleKey)}</h1>
+        <p className="hidden truncate text-xs text-muted-foreground lg:block">{t(meta.subtitleKey)}</p>
       </div>
 
       {/* Search — opens command palette */}
@@ -95,8 +86,8 @@ export function Topbar() {
         onClick={() => document.dispatchEvent(new CustomEvent('open-command-palette'))}
         className="relative hidden w-72 items-center rounded-md border border-input bg-background px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent md:flex"
       >
-        <Search className="mr-2 h-3.5 w-3.5" />
-        <span className="flex-1 text-left">Search or jump to...</span>
+        <Search className="me-2 h-3.5 w-3.5 rtl:ms-0 rtl:me-2" />
+        <span className="flex-1 text-start">{t('topbar.searchPlaceholder')}</span>
         <kbd className="pointer-events-none flex select-none items-center gap-0.5 rounded border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
           <Command className="h-2.5 w-2.5" /> K
         </kbd>
@@ -118,16 +109,16 @@ export function Topbar() {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-96 p-0">
           <div className="flex items-center justify-between border-b px-3 py-2">
-            <span className="text-sm font-semibold">Live Notifications</span>
+            <span className="text-sm font-semibold">{t('topbar.liveNotifications')}</span>
             <Badge variant="outline" className="text-[10px]">
-              <Activity className="mr-1 h-3 w-3 animate-pulse" /> Realtime
+              <Activity className="me-1 h-3 w-3 animate-pulse" /> {t('topbar.realtime')}
             </Badge>
           </div>
           <ScrollArea className="h-96">
             {pushNotifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
                 <Bell className="h-8 w-8 text-muted-foreground/50" />
-                <p className="text-xs text-muted-foreground">No live notifications yet.<br />Push events will appear here.</p>
+                <p className="text-xs text-muted-foreground">{t('topbar.noNotifications')}<br />{t('topbar.noNotificationsDesc')}</p>
               </div>
             ) : (
               <div className="divide-y">
@@ -160,10 +151,12 @@ export function Topbar() {
             className="cursor-pointer justify-center text-xs font-medium"
             onClick={() => setView('notifications')}
           >
-            View all notifications →
+            {t('topbar.viewAll')} →
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <LanguageToggle />
 
       <ThemeToggle />
 
@@ -173,7 +166,7 @@ export function Topbar() {
         onClick={() => setView('apps')}
       >
         <Plus className="h-4 w-4" />
-        New App
+        {t('topbar.newApp')}
       </Button>
     </header>
   )

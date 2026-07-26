@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Cairo } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from '@/components/nexora/theme-provider'
+import { DirectionProvider } from '@/components/nexora/direction-provider'
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,10 +16,17 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Cairo is a clean Arabic-friendly font that also renders Latin well
+const cairo = Cairo({
+  variable: "--font-cairo",
+  subsets: ["arabic", "latin"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Nexora Cloud — Multi-Runtime Hosting Platform",
-  description: "Unified hosting platform for Rust, PHP, Next.js, WebSocket services, push notifications, databases, and everything a professional web app needs.",
-  keywords: ["Nexora", "Cloud Hosting", "Rust", "PHP", "Next.js", "WebSocket", "Push Notifications", "Multi-runtime"],
+  description: "Unified hosting platform for Rust, PHP, Next.js, WebSocket services, Push Notifications, and everything a professional web app needs.",
+  keywords: ["Nexora", "Cloud Hosting", "Rust", "PHP", "Next.js", "WebSocket", "Push Notifications", "Multi-runtime", "منصة استضافة"],
   authors: [{ name: "Nexora Cloud" }],
   icons: {
     icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
@@ -36,12 +45,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="ar" dir="rtl" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
+        className={`${geistSans.variable} ${geistMono.variable} ${cairo.variable} antialiased bg-background text-foreground font-[var(--font-cairo)]`}
       >
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
-          {children}
+          <DirectionProvider>
+            {children}
+          </DirectionProvider>
         </ThemeProvider>
         <Toaster />
       </body>

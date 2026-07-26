@@ -164,3 +164,17 @@
 .pulse-glow {
   animation: pulse-glow 2s infinite;
 }
+
+/* RTL / LTR helpers */
+[dir="rtl"] .ltr\:left-0 { left: auto; right: 0; }
+[dir="rtl"] .ltr\:-translate-x-full { transform: translateX(100%); }
+
+/* Use logical properties where possible */
+[dir="rtl"] body { text-align: right; }
+[dir="ltr"] body { text-align: left; }
+
+/* Fix for icons that should flip in RTL */
+[dir="rtl"] .rtl\:flip { transform: scaleX(-1); }
+
+/* Make sure dropdown menus open on the correct side in RTL */
+[dir="rtl"] [data-radix-popper-content-wrapper] { direction: rtl; }
