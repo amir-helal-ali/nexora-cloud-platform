@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Sparkline } from '@/components/nexora/sparkline'
 import { useRealtime } from '@/hooks/use-realtime'
+import { useI18n } from '@/hooks/use-i18n'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import {
@@ -105,6 +106,7 @@ function fmtTtl(secs: number): string {
 
 export function CdnView() {
   const { metrics } = useRealtime()
+  const { t } = useI18n()}
   const [rules, setRules] = useState<CacheRule[]>(CACHE_RULES)
   const [purgeOpen, setPurgeOpen] = useState(false)
   const [purgeUrl, setPurgeUrl] = useState('')
@@ -148,7 +150,7 @@ export function CdnView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Edge Locations</div>
+              <div className="text-xs text-muted-foreground">{t('cdn.edgeLocations')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums">{onlineLocations}<span className="text-sm font-normal text-muted-foreground"> / {EDGE_LOCATIONS.length}</span></div>
               <div className="text-[10px] text-emerald-600 dark:text-emerald-400">All online</div>
             </div>
@@ -158,7 +160,7 @@ export function CdnView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Requests (24h)</div>
+              <div className="text-xs text-muted-foreground">{t('cdn.requests24h')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums">{fmtNum(totalRequests)}</div>
               <div className="flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400">
                 <TrendingUp className="h-2.5 w-2.5" /> +14.2%
@@ -170,7 +172,7 @@ export function CdnView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Cache Hit Rate</div>
+              <div className="text-xs text-muted-foreground">{t('cdn.cacheHitRate')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums text-emerald-600 dark:text-emerald-400">{avgHitRate.toFixed(1)}%</div>
               <div className="text-[10px] text-muted-foreground">across all edges</div>
             </div>
@@ -180,7 +182,7 @@ export function CdnView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Bandwidth</div>
+              <div className="text-xs text-muted-foreground">{t('cdn.bandwidth')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums">{fmtNum(totalBandwidth)} Mbps</div>
               <div className="text-[10px] text-muted-foreground">{fmtBytes(totalCacheSize)} cached</div>
             </div>
@@ -192,9 +194,9 @@ export function CdnView() {
       <Tabs defaultValue="edges">
         <div className="flex items-center justify-between">
           <TabsList>
-            <TabsTrigger value="edges" className="text-xs">Edge Network</TabsTrigger>
+            <TabsTrigger value="edges" className="text-xs">{t('cdn.edgeNetwork')}</TabsTrigger>
             <TabsTrigger value="rules" className="text-xs">Cache Rules ({rules.length})</TabsTrigger>
-            <TabsTrigger value="purge" className="text-xs">Purge</TabsTrigger>
+            <TabsTrigger value="purge" className="text-xs">{t('cdn.purge')}</TabsTrigger>
           </TabsList>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={() => setPurgeOpen(true)}>
@@ -213,7 +215,7 @@ export function CdnView() {
             <div className="border-b border-border/60 bg-muted/30 px-5 py-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-semibold">Global Edge Network</h3>
+                  <h3 className="text-sm font-semibold">{t('cdn.edgeNetwork')}</h3>
                   <p className="text-xs text-muted-foreground">{EDGE_LOCATIONS.length} PoPs · 7 continents · Anycast routing</p>
                 </div>
                 <Badge variant="outline" className="gap-1 text-[10px] border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
@@ -340,7 +342,7 @@ export function CdnView() {
             <div className="border-b border-border/60 bg-muted/30 px-5 py-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-semibold">Cache Rules</h3>
+                  <h3 className="text-sm font-semibold">{t('cdn.cacheRules')}</h3>
                   <p className="text-xs text-muted-foreground">Define what to cache, bypass, or redirect at the edge</p>
                 </div>
                 <Button size="sm" variant="outline">
@@ -379,7 +381,7 @@ export function CdnView() {
           </Card>
 
           <Card className="p-5">
-            <h3 className="text-sm font-semibold">Cache Performance</h3>
+            <h3 className="text-sm font-semibold">{t('cdn.cachePerformance')}</h3>
             <p className="text-xs text-muted-foreground">Hit rate over the last 60 seconds</p>
             <div className="mt-3 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
               <div className="flex items-baseline justify-between">
@@ -451,7 +453,7 @@ export function CdnView() {
           {/* Recent purges */}
           <Card className="overflow-hidden">
             <div className="border-b border-border/60 bg-muted/30 px-5 py-3">
-              <h3 className="text-sm font-semibold">Recent Purges</h3>
+              <h3 className="text-sm font-semibold">{t('cdn.recentPurges')}</h3>
             </div>
             <div className="divide-y divide-border/60">
               {[

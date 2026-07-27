@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select'
+import { useI18n } from '@/hooks/use-i18n'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import {
@@ -93,6 +94,7 @@ function fmtDate(s: string): string {
 }
 
 export function AuditLogView() {
+  const { t } = useI18n()
   const [events, setEvents] = useState<AuditEvent[]>(INITIAL_EVENTS)
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('all')
@@ -122,7 +124,7 @@ export function AuditLogView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Total Events (24h)</div>
+              <div className="text-xs text-muted-foreground">{t('audit.totalEvents')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums">{totalEvents}</div>
             </div>
             <Activity className="h-5 w-5 text-sky-500" />
@@ -131,7 +133,7 @@ export function AuditLogView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Denied</div>
+              <div className="text-xs text-muted-foreground">{t('audit.denied')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums text-rose-600 dark:text-rose-400">{deniedCount}</div>
             </div>
             <XCircle className="h-5 w-5 text-rose-500" />
@@ -140,7 +142,7 @@ export function AuditLogView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Failed</div>
+              <div className="text-xs text-muted-foreground">{t('audit.failed')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums text-amber-600 dark:text-amber-400">{failureCount}</div>
             </div>
             <AlertTriangle className="h-5 w-5 text-amber-500" />
@@ -149,7 +151,7 @@ export function AuditLogView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Critical</div>
+              <div className="text-xs text-muted-foreground">{t('audit.criticalEvents')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums text-rose-600 dark:text-rose-400">{criticalCount}</div>
             </div>
             <Shield className="h-5 w-5 text-rose-600" />
@@ -165,7 +167,7 @@ export function AuditLogView() {
           </div>
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm font-semibold">Compliance Status</span>
+              <span className="text-sm font-semibold">{t('audit.complianceStatus')}</span>
               <Badge variant="outline" className="text-[10px] border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">SOC 2 Type II</Badge>
               <Badge variant="outline" className="text-[10px] border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">ISO 27001</Badge>
               <Badge variant="outline" className="text-[10px] border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">GDPR</Badge>
@@ -183,9 +185,9 @@ export function AuditLogView() {
       <Tabs defaultValue="timeline">
         <div className="flex items-center justify-between">
           <TabsList>
-            <TabsTrigger value="timeline" className="text-xs">Timeline</TabsTrigger>
-            <TabsTrigger value="security" className="text-xs">Security Events</TabsTrigger>
-            <TabsTrigger value="export" className="text-xs">Export & SIEM</TabsTrigger>
+            <TabsTrigger value="timeline" className="text-xs">{t('audit.timeline')}</TabsTrigger>
+            <TabsTrigger value="security" className="text-xs">{t('audit.securityEvents')}</TabsTrigger>
+            <TabsTrigger value="export" className="text-xs">{t('audit.exportSiem')}</TabsTrigger>
           </TabsList>
           <Button variant="outline" size="sm" onClick={() => toast.success('Audit log exported', { description: 'audit-log.csv · 20 events' })}>
             <Download className="h-3.5 w-3.5" /> Export CSV
@@ -333,7 +335,7 @@ export function AuditLogView() {
 
           {/* Active threats */}
           <Card className="p-5">
-            <h3 className="text-sm font-semibold">Active Threat Mitigations</h3>
+            <h3 className="text-sm font-semibold">{t('audit.activeThreatMitigations')}</h3>
             <div className="mt-3 grid gap-3 sm:grid-cols-3">
               {[
                 { name: 'WAF Rules', count: 142, color: 'text-amber-500', icon: Shield },
@@ -357,7 +359,7 @@ export function AuditLogView() {
 
         <TabsContent value="export" className="space-y-3 mt-4">
           <Card className="p-5">
-            <h3 className="text-sm font-semibold">SIEM Integrations</h3>
+            <h3 className="text-sm font-semibold">{t('audit.siemIntegrations')}</h3>
             <p className="text-xs text-muted-foreground">Stream audit events to your security information and event management system</p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {[
@@ -385,7 +387,7 @@ export function AuditLogView() {
           </Card>
 
           <Card className="p-5">
-            <h3 className="text-sm font-semibold">Log Retention</h3>
+            <h3 className="text-sm font-semibold">{t('audit.logRetention')}</h3>
             <div className="mt-3 space-y-2">
               {[
                 { period: 'Hot (searchable)', duration: '90 days', storage: '38 GB', color: 'text-rose-500' },
