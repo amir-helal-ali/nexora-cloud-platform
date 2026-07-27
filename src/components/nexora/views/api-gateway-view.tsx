@@ -17,6 +17,7 @@ import {
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useI18n } from '@/hooks/use-i18n'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import {
@@ -87,6 +88,7 @@ function fmtNum(n: number): string {
 }
 
 export function ApiGatewayView() {
+  const { t } = useI18n()
   const [routes, setRoutes] = useState<GatewayRoute[]>(INITIAL_ROUTES)
   const [createOpen, setCreateOpen] = useState(false)
   const [selected, setSelected] = useState<GatewayRoute | null>(null)
@@ -171,7 +173,7 @@ export function ApiGatewayView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Active Routes</div>
+              <div className="text-xs text-muted-foreground">{t('gateway.activeRoutes')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums">{activeRoutes}<span className="text-sm font-normal text-muted-foreground"> / {routes.length}</span></div>
             </div>
             <Route className="h-5 w-5 text-emerald-500" />
@@ -180,7 +182,7 @@ export function ApiGatewayView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Requests / sec</div>
+              <div className="text-xs text-muted-foreground">{t('gateway.requestsPerSec')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums">{totalRps.toFixed(0)}</div>
             </div>
             <Activity className="h-5 w-5 text-sky-500" />
@@ -189,7 +191,7 @@ export function ApiGatewayView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Total Requests (24h)</div>
+              <div className="text-xs text-muted-foreground">{t('gateway.totalRequests24h')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums">{fmtNum(totalRequests)}</div>
             </div>
             <Gauge className="h-5 w-5 text-violet-500" />
@@ -198,7 +200,7 @@ export function ApiGatewayView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Avg Error Rate</div>
+              <div className="text-xs text-muted-foreground">{t('gateway.avgErrorRate')}</div>
               <div className={cn('mt-1 text-2xl font-bold tabular-nums', avgErrorRate > 1 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400')}>
                 {avgErrorRate.toFixed(2)}%
               </div>
@@ -212,8 +214,8 @@ export function ApiGatewayView() {
         <div className="flex items-center justify-between">
           <TabsList>
             <TabsTrigger value="routes" className="text-xs">Routes ({routes.length})</TabsTrigger>
-            <TabsTrigger value="middleware" className="text-xs">Middleware</TabsTrigger>
-            <TabsTrigger value="ratelimit" className="text-xs">Rate Limiting</TabsTrigger>
+            <TabsTrigger value="middleware" className="text-xs">{t('gateway.middleware')}</TabsTrigger>
+            <TabsTrigger value="ratelimit" className="text-xs">{t('gateway.rateLimiting')}</TabsTrigger>
           </TabsList>
           <Dialog open={createOpen} onOpenChange={setCreateOpen}>
             <DialogTrigger asChild>
@@ -223,13 +225,13 @@ export function ApiGatewayView() {
             </DialogTrigger>
             <DialogContent className="max-w-xl">
               <DialogHeader>
-                <DialogTitle>Create Gateway Route</DialogTitle>
+                <DialogTitle>{t('gateway.createRoute')}</DialogTitle>
                 <DialogDescription>Define a new API endpoint with custom routing, auth, and rate limiting.</DialogDescription>
               </DialogHeader>
               <div className="space-y-3 py-2">
                 <div className="grid grid-cols-[100px_1fr] gap-3">
                   <div>
-                    <Label className="text-xs font-medium">Method</Label>
+                    <Label className="text-xs font-medium">{t('gateway.method')}</Label>
                     <Select value={newRoute.method} onValueChange={(v) => setNewRoute({ ...newRoute, method: v as GatewayRoute['method'] })}>
                       <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
                       <SelectContent>
@@ -238,13 +240,13 @@ export function ApiGatewayView() {
                     </Select>
                   </div>
                   <div>
-                    <Label className="text-xs font-medium">Public Path</Label>
+                    <Label className="text-xs font-medium">{t('gateway.publicPath')}</Label>
                     <Input value={newRoute.path} onChange={(e) => setNewRoute({ ...newRoute, path: e.target.value })} placeholder="/api/v1/products" className="mt-1.5 font-mono text-sm" />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label className="text-xs font-medium">Target App</Label>
+                    <Label className="text-xs font-medium">{t('gateway.targetApp')}</Label>
                     <Select value={newRoute.targetApp} onValueChange={(v) => setNewRoute({ ...newRoute, targetApp: v })}>
                       <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
                       <SelectContent>
@@ -258,13 +260,13 @@ export function ApiGatewayView() {
                     </Select>
                   </div>
                   <div>
-                    <Label className="text-xs font-medium">Target Path</Label>
+                    <Label className="text-xs font-medium">{t('gateway.targetPath')}</Label>
                     <Input value={newRoute.targetPath} onChange={(e) => setNewRoute({ ...newRoute, targetPath: e.target.value })} placeholder="/products" className="mt-1.5 font-mono text-sm" />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label className="text-xs font-medium">Authentication</Label>
+                    <Label className="text-xs font-medium">{t('gateway.authentication')}</Label>
                     <Select value={newRoute.auth} onValueChange={(v) => setNewRoute({ ...newRoute, auth: v as GatewayRoute['auth'] })}>
                       <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
                       <SelectContent>
@@ -276,13 +278,13 @@ export function ApiGatewayView() {
                     </Select>
                   </div>
                   <div>
-                    <Label className="text-xs font-medium">Rate Limit (req/min)</Label>
+                    <Label className="text-xs font-medium">{t('gateway.rateLimit')}</Label>
                     <Input type="number" value={newRoute.rateLimit} onChange={(e) => setNewRoute({ ...newRoute, rateLimit: Number(e.target.value) })} className="mt-1.5" />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label className="text-xs font-medium">Timeout (ms)</Label>
+                    <Label className="text-xs font-medium">{t('gateway.timeoutMs')}</Label>
                     <Input type="number" value={newRoute.timeoutMs} onChange={(e) => setNewRoute({ ...newRoute, timeoutMs: Number(e.target.value) })} className="mt-1.5" />
                   </div>
                   <div className="flex items-end gap-4 pb-1">
@@ -298,7 +300,7 @@ export function ApiGatewayView() {
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
+                <Button variant="outline" onClick={() => setCreateOpen(false)}>{t('common.cancel')}</Button>
                 <Button onClick={handleCreate} className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
                   <Network className="h-4 w-4" /> Create Route
                 </Button>

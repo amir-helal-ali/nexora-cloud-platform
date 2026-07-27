@@ -17,6 +17,7 @@ import {
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useI18n } from '@/hooks/use-i18n'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import {
@@ -173,6 +174,7 @@ function fmtNum(n: number): string {
 }
 
 export function FeatureFlagsView() {
+  const { t } = useI18n()
   const [flags, setFlags] = useState<FeatureFlag[]>(INITIAL_FLAGS)
   const [tests, setTests] = useState<ABTest[]>(INITIAL_TESTS)
   const [createOpen, setCreateOpen] = useState(false)
@@ -248,27 +250,27 @@ export function FeatureFlagsView() {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Create Feature Flag</DialogTitle>
+                <DialogTitle>{t('flags.createFlag')}</DialogTitle>
                 <DialogDescription>Control feature rollout with percentage-based targeting.</DialogDescription>
               </DialogHeader>
               <div className="space-y-3 py-2">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label className="text-xs font-medium">Key</Label>
+                    <Label className="text-xs font-medium">{t('flags.flagKey')}</Label>
                     <Input value={newFlag.key} onChange={(e) => setNewFlag({ ...newFlag, key: e.target.value })} placeholder="new_feature_v1" className="mt-1.5 font-mono text-sm" />
                   </div>
                   <div>
-                    <Label className="text-xs font-medium">Name</Label>
+                    <Label className="text-xs font-medium">{t('flags.flagName')}</Label>
                     <Input value={newFlag.name} onChange={(e) => setNewFlag({ ...newFlag, name: e.target.value })} placeholder="New Feature V1" className="mt-1.5" />
                   </div>
                 </div>
                 <div>
-                  <Label className="text-xs font-medium">Description</Label>
+                  <Label className="text-xs font-medium">{t('flags.description')}</Label>
                   <Input value={newFlag.description} onChange={(e) => setNewFlag({ ...newFlag, description: e.target.value })} placeholder="Short description" className="mt-1.5" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label className="text-xs font-medium">Type</Label>
+                    <Label className="text-xs font-medium">{t('flags.type')}</Label>
                     <Select value={newFlag.type} onValueChange={(v) => setNewFlag({ ...newFlag, type: v as FeatureFlag['type'] })}>
                       <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
                       <SelectContent>
@@ -287,7 +289,7 @@ export function FeatureFlagsView() {
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
+                <Button variant="outline" onClick={() => setCreateOpen(false)}>{t('common.cancel')}</Button>
                 <Button onClick={handleCreate} className="bg-gradient-to-br from-violet-500 to-purple-600 text-white">
                   <Flag className="h-4 w-4" /> Create Flag
                 </Button>
