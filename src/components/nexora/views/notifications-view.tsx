@@ -14,6 +14,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select'
 import { useRealtime } from '@/hooks/use-realtime'
+import { useI18n } from '@/hooks/use-i18n'
 import { fmtDate } from '@/lib/nexora'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -52,6 +53,7 @@ const CHANNEL_META: Record<string, { label: string; icon: any; color: string }> 
 
 export function NotificationsView() {
   const { pushNotifications, sendPushTest } = useRealtime()
+  const { t } = useI18n()
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(true)
   const [composeOpen, setComposeOpen] = useState(false)
@@ -165,24 +167,24 @@ export function NotificationsView() {
             <Send className="h-5 w-5 text-violet-600 dark:text-violet-400" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold">Send Push Notification</h3>
+            <h3 className="text-sm font-semibold">{t('notifications.title')}</h3>
             <p className="mt-0.5 text-xs text-muted-foreground">Broadcast to all devices, subscribers, or webhook endpoints</p>
           </div>
         </div>
         <Dialog open={composeOpen} onOpenChange={setComposeOpen}>
           <DialogTrigger asChild>
             <Button className="bg-gradient-to-br from-violet-500 to-purple-600 text-white hover:from-violet-600 hover:to-purple-700">
-              <Plus className="h-4 w-4" /> Compose
+              <Plus className="h-4 w-4" /> {t('notifications.compose')}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>Compose Notification</DialogTitle>
+              <DialogTitle>{t('notifications.composePush')}</DialogTitle>
               <DialogDescription>This notification will be delivered to all subscribed devices and shown live in the toast.</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-2">
               <div>
-                <Label className="text-xs font-medium">Title</Label>
+                <Label className="text-xs font-medium">{t('notifications.title2')}</Label>
                 <Input
                   value={compose.title}
                   onChange={(e) => setCompose({ ...compose, title: e.target.value })}
@@ -191,7 +193,7 @@ export function NotificationsView() {
                 />
               </div>
               <div>
-                <Label className="text-xs font-medium">Message</Label>
+                <Label className="text-xs font-medium">{t('notifications.message')}</Label>
                 <Input
                   value={compose.message}
                   onChange={(e) => setCompose({ ...compose, message: e.target.value })}
@@ -201,7 +203,7 @@ export function NotificationsView() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-xs font-medium">Type</Label>
+                  <Label className="text-xs font-medium">{t('notifications.type')}</Label>
                   <Select value={compose.type} onValueChange={(v) => setCompose({ ...compose, type: v })}>
                     <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -213,20 +215,20 @@ export function NotificationsView() {
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-xs font-medium">Channel</Label>
+                  <Label className="text-xs font-medium">{t('notifications.channel')}</Label>
                   <Select value={compose.channel} onValueChange={(v) => setCompose({ ...compose, channel: v })}>
                     <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="push">Web Push</SelectItem>
-                      <SelectItem value="in_app">In-App</SelectItem>
-                      <SelectItem value="email">Email</SelectItem>
-                      <SelectItem value="webhook">Webhook</SelectItem>
+                      <SelectItem value="in_app">{t('notifications.inApp')}</SelectItem>
+                      <SelectItem value="email">{t('notifications.email')}</SelectItem>
+                      <SelectItem value="webhook">{t('notifications.webhook')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
               <div className="rounded-lg border bg-muted/30 p-3">
-                <div className="mb-1 text-[10px] font-semibold uppercase text-muted-foreground">Preview</div>
+                <div className="mb-1 text-[10px] font-semibold uppercase text-muted-foreground">{t('notifications.preview')}</div>
                 <div className="flex items-start gap-2.5">
                   <div className={cn(
                     'mt-0.5 h-2 w-2 rounded-full',
@@ -242,9 +244,9 @@ export function NotificationsView() {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setComposeOpen(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setComposeOpen(false)}>{t('common.cancel')}</Button>
               <Button onClick={handleSend} className="bg-gradient-to-br from-violet-500 to-purple-600 text-white">
-                <Send className="h-4 w-4" /> Send Now
+                <Send className="h-4 w-4" /> {t('notifications.sendNow')}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -254,7 +256,7 @@ export function NotificationsView() {
       {/* Filter tabs */}
       <Tabs value={filter} onValueChange={setFilter}>
         <TabsList>
-          <TabsTrigger value="all" className="text-xs">All ({notifications.length})</TabsTrigger>
+          <TabsTrigger value="all" className="text-xs">{t('common.all')} ({notifications.length})</TabsTrigger>
           {channels.map(ch => {
             const meta = CHANNEL_META[ch]
             const Icon = meta.icon
@@ -274,7 +276,7 @@ export function NotificationsView() {
           {filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-2 p-12 text-center">
               <Inbox className="h-10 w-10 text-muted-foreground/50" />
-              <p className="text-sm font-medium">No notifications</p>
+              <p className="text-sm font-medium">{t('notifications.noNotifications')}</p>
               <p className="text-xs text-muted-foreground">Compose one above to see it appear here.</p>
             </div>
           ) : (
