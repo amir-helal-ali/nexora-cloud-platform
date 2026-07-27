@@ -1,37 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { withAuth, validateBody, getClientIp } from '@/lib/api'
+import { schemas, logAudit } from '@/lib/security'
 
-export async function GET() {
-  const notifications = await db.notification.findMany({
-    take: 50,
-    orderBy: { createdAt: 'desc' },
+export async function GET(req: NextRequest) {
+  return withAuth(req, async ({ userId }) => {
+    const notifications = await db.notification.findMany({
+      where: { userId },
+      take: 50,
+      orderBy: { createdAt: 'desc' },
+    })
+    return NextResponse.json({ notifications })
   })
-  return NextResponse.json({ notifications })
 }
 
 export async function POST(req: NextRequest) {
-  try {
+  return withAuth(req, async ({ userId, userEmail }) => {
     const body = await req.json()
-    const owner = await db.user.findFirst({ where: { role: 'owner' } })
-    if (!owner) return NextResponse.json({ error: 'No owner' }, { status: 400 })
+    const validation = validateBody(schemas.createNotification, body)
+    if (!validation.success) return validation.response
 
+    const data = validation.data
     const notif = await db.notification.create({
       data: {
-        userId: owner.id,
-        title: body.title,
-        message: body.message,
-        type: body.type || 'info',
-        channel: body.channel || 'push',
+        userId,
+        title: data.title,
+        message: data.message,
+        type: data.type,
+        channel: data.channel,
         status: 'delivered',
-        recipients: body.recipients || 4,
-        delivered: body.recipients || 4,
+        recipients: data.recipients,
+        delivered: data.recipients,
         opened: 0,
-        payload: JSON.stringify({ source: 'manual', priority: 'normal' }),
+        payload: JSON.stringify({ source: 'manual', priority: data.type === 'error' ? 'high' : 'normal' }),
       },
     })
 
-    return NextResponse.json({ notification: notif })
-  } catch (e) {
-    return NextResponse.json({ error: 'Failed' }, { status: 500 })
-  }
+    await logAudit({
+      db, userId, actor: userEmail,
+      action: 'send_push', category: 'notification', resource: 'notification', resourceId: notif.id,
+      ip: getClientIp(req), details: `Sent ${data.channel} notification: ${data.title}`,
+      severity: 'info',
+    })
+
+    return NextResponse.json({ notification: notif }, { status: 201 })
+  })
 }

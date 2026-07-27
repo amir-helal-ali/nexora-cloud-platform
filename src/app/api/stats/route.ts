@@ -1,8 +1,10 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { withAuth, getClientIp } from '@/lib/api'
+import { logAudit } from '@/lib/security'
 
-export async function GET() {
-  try {
+export async function GET(req: NextRequest) {
+  return withAuth(req, async ({ userId }) => {
     const [
       apps,
       databases,
@@ -11,17 +13,24 @@ export async function GET() {
       team,
       notifications,
       activities,
+      secrets,
+      featureFlags,
+      backups,
+      gatewayRoutes,
+      auditLogs,
     ] = await Promise.all([
-      db.app.findMany({
-        include: { deployments: { take: 1, orderBy: { createdAt: 'desc' } } },
-        orderBy: { createdAt: 'asc' },
-      }),
-      db.database.findMany({ orderBy: { createdAt: 'asc' } }),
-      db.domain.findMany({ orderBy: { createdAt: 'asc' } }),
+      db.app.findMany({ where: { userId }, include: { deployments: { take: 1, orderBy: { createdAt: 'desc' } } }, orderBy: { createdAt: 'asc' } }),
+      db.database.findMany({ where: { userId }, orderBy: { createdAt: 'asc' } }),
+      db.domain.findMany({ where: { userId }, orderBy: { createdAt: 'asc' } }),
       db.webSocketService.findMany({ include: { app: true } }),
-      db.teamMember.findMany({ orderBy: { createdAt: 'asc' } }),
-      db.notification.findMany({ take: 20, orderBy: { createdAt: 'desc' } }),
-      db.activity.findMany({ take: 20, orderBy: { createdAt: 'desc' } }),
+      db.teamMember.findMany({ where: { userId }, orderBy: { createdAt: 'asc' } }),
+      db.notification.findMany({ where: { userId }, take: 20, orderBy: { createdAt: 'desc' } }),
+      db.activity.findMany({ where: { userId }, take: 20, orderBy: { createdAt: 'desc' } }),
+      db.secret.findMany({ where: { userId }, orderBy: { createdAt: 'asc' } }),
+      db.featureFlag.findMany({ where: { userId }, orderBy: { createdAt: 'asc' } }),
+      db.backup.findMany({ where: { userId }, take: 20, orderBy: { createdAt: 'desc' } }),
+      db.gatewayRoute.findMany({ where: { userId }, orderBy: { createdAt: 'asc' } }),
+      db.auditLog.findMany({ where: { userId }, take: 20, orderBy: { timestamp: 'desc' } }),
     ])
 
     const runningApps = apps.filter(a => a.status === 'running').length
@@ -45,13 +54,8 @@ export async function GET() {
     }, {} as Record<string, number>)
 
     return NextResponse.json({
-      apps,
-      databases,
-      domains,
-      websockets,
-      team,
-      notifications,
-      activities,
+      apps, databases, domains, websockets, team, notifications, activities,
+      secrets, featureFlags, backups, gatewayRoutes, auditLogs,
       summary: {
         totalApps: apps.length,
         runningApps,
@@ -75,10 +79,12 @@ export async function GET() {
         pendingMembers: team.filter(t => t.status === 'pending').length,
         unreadNotifications: notifications.filter(n => n.opened < n.delivered).length,
         runtimeBreakdown,
+        totalSecrets: secrets.length,
+        totalFlags: featureFlags.length,
+        totalBackups: backups.length,
+        totalRoutes: gatewayRoutes.length,
+        totalAuditEvents: auditLogs.length,
       },
     })
-  } catch (e) {
-    console.error('GET /api/stats error:', e)
-    return NextResponse.json({ error: 'Failed to load stats' }, { status: 500 })
-  }
+  })
 }

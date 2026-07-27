@@ -5,38 +5,39 @@ import { schemas, logAudit } from '@/lib/security'
 
 export async function GET(req: NextRequest) {
   return withAuth(req, async ({ userId }) => {
-    const team = await db.teamMember.findMany({
+    const flags = await db.featureFlag.findMany({
       where: { userId },
-      orderBy: { createdAt: 'asc' },
+      orderBy: { createdAt: 'desc' },
     })
-    return NextResponse.json({ team })
+    return NextResponse.json({ flags })
   })
 }
 
 export async function POST(req: NextRequest) {
   return withAuth(req, async ({ userId, userEmail }) => {
     const body = await req.json()
-    const validation = validateBody(schemas.createTeamMember, body)
+    const validation = validateBody(schemas.createFlag, body)
     if (!validation.success) return validation.response
 
     const data = validation.data
-    const member = await db.teamMember.create({
+    const flag = await db.featureFlag.create({
       data: {
-        email: data.email,
+        key: data.key,
         name: data.name,
-        role: data.role,
-        status: 'pending',
+        description: data.description,
+        type: data.type,
+        percentage: data.percentage,
         userId,
       },
     })
 
     await logAudit({
       db, userId, actor: userEmail,
-      action: 'invite', category: 'team', resource: 'team', resourceId: member.id,
-      ip: getClientIp(req), details: `Invited ${data.email} as ${data.role}`,
+      action: 'create_flag', category: 'config', resource: 'feature_flag', resourceId: flag.id,
+      ip: getClientIp(req), details: `Created flag: ${data.key}`,
       severity: 'info',
     })
 
-    return NextResponse.json({ member }, { status: 201 })
+    return NextResponse.json({ flag }, { status: 201 })
   })
 }

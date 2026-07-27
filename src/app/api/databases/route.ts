@@ -1,38 +1,46 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { withAuth, validateBody, getClientIp } from '@/lib/api'
+import { schemas, logAudit } from '@/lib/security'
 
-export async function GET() {
-  const databases = await db.database.findMany({ orderBy: { createdAt: 'asc' } })
-  return NextResponse.json({ databases })
+export async function GET(req: NextRequest) {
+  return withAuth(req, async ({ userId }) => {
+    const databases = await db.database.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'asc' },
+    })
+    return NextResponse.json({ databases })
+  })
 }
 
 export async function POST(req: NextRequest) {
-  try {
+  return withAuth(req, async ({ userId, userEmail }) => {
     const body = await req.json()
-    const owner = await db.user.findFirst({ where: { role: 'owner' } })
-    if (!owner) return NextResponse.json({ error: 'No owner' }, { status: 400 })
+    const validation = validateBody(schemas.createDatabase, body)
+    if (!validation.success) return validation.response
 
+    const data = validation.data
     const ports: Record<string, number> = {
       postgresql: 5432, mysql: 3306, redis: 6379, mongodb: 27017, mariadb: 3307, sqlite: 0,
     }
     const database = await db.database.create({
       data: {
-        name: body.name,
-        engine: body.engine,
-        version: body.version || 'latest',
-        region: body.region || 'fra1',
+        name: data.name,
+        engine: data.engine,
+        version: data.version || 'latest',
+        region: data.region,
         status: 'creating',
-        size: body.size || 1,
+        size: data.size,
         usedMb: 0,
         connections: 0,
-        maxConnections: body.maxConnections || 100,
-        host: `db-${body.name.toLowerCase()}.internal.nexora.app`,
-        port: ports[body.engine] || 5432,
-        username: body.username || 'admin',
+        maxConnections: data.maxConnections,
+        host: `db-${data.name.toLowerCase()}.internal.nexora.app`,
+        port: ports[data.engine] || 5432,
+        username: data.username,
         password: '••••••••••••',
-        ssl: body.ssl !== false,
-        backupEnabled: body.backupEnabled !== false,
-        userId: owner.id,
+        ssl: data.ssl,
+        backupEnabled: data.backupEnabled,
+        userId,
       },
     })
 
@@ -43,20 +51,13 @@ export async function POST(req: NextRequest) {
       } catch {}
     }, 2000)
 
-    await db.activity.create({
-      data: {
-        action: 'create_db',
-        resource: 'database',
-        resourceId: database.id,
-        detail: `Created ${body.engine} database ${body.name}`,
-        ip: '197.45.12.88',
-        userId: owner.id,
-      },
+    await logAudit({
+      db, userId, actor: userEmail,
+      action: 'create_db', category: 'database', resource: 'database', resourceId: database.id,
+      ip: getClientIp(req), details: `Created ${data.engine} database: ${data.name}`,
+      severity: 'info',
     })
 
-    return NextResponse.json({ database })
-  } catch (e) {
-    console.error('POST /api/databases error:', e)
-    return NextResponse.json({ error: 'Failed to create database' }, { status: 500 })
-  }
+    return NextResponse.json({ database }, { status: 201 })
+  })
 }

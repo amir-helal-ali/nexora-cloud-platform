@@ -5,6 +5,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from '@/components/nexora/theme-provider'
 import { DirectionProvider } from '@/components/nexora/direction-provider'
+import { Providers } from '@/components/nexora/providers'
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,7 +17,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Cairo is a clean Arabic-friendly font that also renders Latin well
 const cairo = Cairo({
   variable: "--font-cairo",
   subsets: ["arabic", "latin"],
@@ -49,11 +49,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${cairo.variable} antialiased bg-background text-foreground font-[var(--font-cairo)]`}
       >
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
-          <DirectionProvider>
-            {children}
-          </DirectionProvider>
-        </ThemeProvider>
+        <Providers>
+          <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+            <DirectionProvider>
+              {children}
+            </DirectionProvider>
+          </ThemeProvider>
+        </Providers>
         <Toaster />
       </body>
     </html>
