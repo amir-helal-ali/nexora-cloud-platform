@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { Cloud, RefreshCw, AlertTriangle } from 'lucide-react'
 
 export default function Error({
@@ -9,6 +10,16 @@ export default function Error({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  useEffect(() => {
+    // Report error to Sentry (if configured)
+    import('@/lib/sentry').then(({ captureError }) => {
+      captureError(error, { digest: error.digest })
+    }).catch(() => {
+      // Sentry not available — just console.error
+      console.error('Application error:', error)
+    })
+  }, [error])
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-rose-50 via-orange-50 to-amber-50 px-4 dark:from-rose-950 dark:via-orange-950 dark:to-amber-950">
       <div className="w-full max-w-md text-center">
@@ -51,7 +62,7 @@ export default function Error({
 
         <p className="mt-6 text-[10px] text-muted-foreground">
           <Cloud className="mr-1 inline h-3 w-3" />
-          Nexora Cloud Platform
+          Nexora Cloud Platform · Error ID: {error.digest || 'unknown'}
         </p>
       </div>
     </div>
