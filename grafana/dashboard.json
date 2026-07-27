@@ -1,0 +1,218 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Nexora Cloud Platform — Production Monitoring Dashboard",
+  "editable": true,
+  "graphTooltip": 1,
+  "panels": [
+    {
+      "title": "HTTP Requests Total",
+      "type": "stat",
+      "datasource": "Prometheus",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(nexora_http_requests_total[5m]))",
+          "legendFormat": "req/s",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "thresholds": {
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 10 },
+              { "color": "green", "value": 50 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "Process Memory (RSS)",
+      "type": "gauge",
+      "datasource": "Prometheus",
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 0 },
+      "targets": [
+        {
+          "expr": "nexora_process_rss_bytes / 1024 / 1024",
+          "legendFormat": "RSS MB",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "MB",
+          "max": 1024,
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 512 },
+              { "color": "red", "value": 768 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "Heap Usage",
+      "type": "gauge",
+      "datasource": "Prometheus",
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "nexora_process_heap_used_bytes / nexora_process_heap_total_bytes * 100",
+          "legendFormat": "Heap %",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "max": 100,
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 70 },
+              { "color": "red", "value": 90 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "Event Loop Lag",
+      "type": "stat",
+      "datasource": "Prometheus",
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 0 },
+      "targets": [
+        {
+          "expr": "nexora_event_loop_lag_ms",
+          "legendFormat": "Lag ms",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 50 },
+              { "color": "red", "value": 100 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "Memory Usage Over Time",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+      "targets": [
+        {
+          "expr": "nexora_process_rss_bytes / 1024 / 1024",
+          "legendFormat": "RSS (MB)",
+          "refId": "A"
+        },
+        {
+          "expr": "nexora_process_heap_used_bytes / 1024 / 1024",
+          "legendFormat": "Heap Used (MB)",
+          "refId": "B"
+        },
+        {
+          "expr": "nexora_process_heap_total_bytes / 1024 / 1024",
+          "legendFormat": "Heap Total (MB)",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "MB" }
+      }
+    },
+    {
+      "title": "CPU Usage Over Time",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
+      "targets": [
+        {
+          "expr": "rate(nexora_process_cpu_user_microseconds[5m]) / 1000000 * 100",
+          "legendFormat": "User CPU %",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(nexora_process_cpu_system_microseconds[5m]) / 1000000 * 100",
+          "legendFormat": "System CPU %",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "percent" }
+      }
+    },
+    {
+      "title": "Application Metrics",
+      "type": "stat",
+      "datasource": "Prometheus",
+      "gridPos": { "h": 6, "w": 4, "x": 0, "y": 14 },
+      "targets": [{ "expr": "nexora_apps_total", "refId": "A" }],
+      "fieldConfig": { "defaults": { "unit": "short" } },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    {
+      "title": "Databases",
+      "type": "stat",
+      "datasource": "Prometheus",
+      "gridPos": { "h": 6, "w": 4, "x": 4, "y": 14 },
+      "targets": [{ "expr": "nexora_databases_total", "refId": "A" }]
+    },
+    {
+      "title": "Users",
+      "type": "stat",
+      "datasource": "Prometheus",
+      "gridPos": { "h": 6, "w": 4, "x": 8, "y": 14 },
+      "targets": [{ "expr": "nexora_users_total", "refId": "A" }]
+    },
+    {
+      "title": "Deployments",
+      "type": "stat",
+      "datasource": "Prometheus",
+      "gridPos": { "h": 6, "w": 4, "x": 12, "y": 14 },
+      "targets": [{ "expr": "nexora_deployments_total", "refId": "A" }]
+    },
+    {
+      "title": "Uptime",
+      "type": "stat",
+      "datasource": "Prometheus",
+      "gridPos": { "h": 6, "w": 4, "x": 16, "y": 14 },
+      "targets": [{ "expr": "nexora_process_uptime_seconds / 3600", "legendFormat": "Hours", "refId": "A" }],
+      "fieldConfig": { "defaults": { "unit": "h" } }
+    }
+  ],
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["nexora", "cloud", "production"],
+  "templating": { "list": [] },
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Nexora Cloud — Production Dashboard",
+  "uid": "nexora-cloud-prod",
+  "version": 1,
+  "weekStart": ""
+}
