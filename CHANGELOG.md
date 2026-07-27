@@ -7,11 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
+### Added — Production Hardening
+- NextAuth.js authentication with bcrypt password hashing (12 rounds)
+- Login page (`/login`) and Register page (`/register`)
+- middleware.ts protecting all routes with security headers
+- Zod validation schemas on ALL API routes (12 schemas)
+- Rate limiting: 100 req/min per user (in-memory sliding window)
+- AES-256-GCM encryption for secrets (via Node crypto)
+- Audit logging on every database mutation (13 fields per event)
+- Error boundaries: error.tsx, not-found.tsx, loading.tsx
+- Health check endpoint at `/api/health` (checks DB + realtime)
+- 7 security headers (X-Content-Type-Options, X-Frame-Options, HSTS, etc.)
+- CORS restriction on realtime service (ALLOWED_ORIGINS env var)
+- 98 unit tests (security, auth, validation, database, i18n)
+- PostgreSQL migration guide (`docs/POSTGRESQL_MIGRATION.md`)
+- CI pipeline with dedicated test job + coverage artifacts
+
+### Added — Backend Integration (100%)
+- 8 new API routes: monitoring, pipelines, marketplace, billing, analytics, settings, cdn, mesh
+- ALL 23 views now fetch from real API endpoints backed by database
+- ALL mutations (create/update/delete) persist to database
+- API key generation with SHA-256 hashing
+- Real billing usage from database (apps, storage, connections counts)
+- Real analytics from database (runtime breakdown, channel stats)
+- Real mesh topology from apps + databases + gateway routes
+- Real pipelines from deployment history
+
+### Added — Docker & Infrastructure
 - Docker multi-stage builds for production (Dockerfile + Dockerfile.realtime)
 - Docker Compose orchestration (production + dev + GHCR variants)
 - Caddy reverse proxy with auto-HTTPS and HTTP/3
-- GitHub Actions CI pipeline (lint, build, security, docker build)
+- GitHub Actions CI pipeline (lint, test, build, security, docker build)
 - GitHub Actions Docker publish workflow (multi-arch: amd64 + arm64)
 - Dependabot configuration for npm, GitHub Actions, and Docker
 - Issue templates (bug report, feature request)
@@ -19,7 +45,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive README with deployment guide
 - Contributing guidelines
 - MIT License
-- `.env.example` with all configuration options
+- `.env.example` with all configuration options (NEXTAUTH_SECRET, ENCRYPTION_KEY, ALLOWED_ORIGINS)
+
+### Added — i18n (Arabic + English)
+- Complete Arabic translations (912 keys) with RTL layout
+- English translations for parity
+- LanguageToggle component in Topbar
+- DirectionProvider syncing `<html dir/lang>` with locale
+- Cairo font for Arabic rendering
+- Logical CSS properties (me-*, ms-*, pe-*) for RTL/LTR
+
+### Changed
+- Prisma schema: added 6 new models (Secret, FeatureFlag, AuditLog, Backup, ApiKey, GatewayRoute)
+- User model: added password field (bcrypt hash)
+- Seed script: creates owner with password `admin123`, encrypts secrets
+- Dockerfile: added NEXTAUTH_SECRET, ENCRYPTION_KEY, ALLOWED_ORIGINS env vars
+- docker-compose.yml: healthcheck uses `/api/health`
 
 ### Changed
 - Updated `.gitignore` for Docker workflow

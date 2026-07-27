@@ -437,6 +437,6 @@
   "analytics": {},
   "simulator": {},
   "deployments": {},
-  "logs2": {},
-  "pipelines": {}
+  "pipelines": {},
+  "logs": {}
 }
