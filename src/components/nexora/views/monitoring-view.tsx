@@ -20,6 +20,7 @@ import {
 import { useRealtime } from '@/hooks/use-realtime'
 import { Sparkline } from '@/components/nexora/sparkline'
 import { RUNTIME_META, fmtNum, fmtDate } from '@/lib/nexora'
+import { useI18n } from '@/hooks/use-i18n'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import {
@@ -90,6 +91,7 @@ const INITIAL_EVENTS: AlertEvent[] = [
 
 export function MonitoringView() {
   const { metrics } = useRealtime()
+  const { t } = useI18n()
   const [rules, setRules] = useState<AlertRule[]>(INITIAL_RULES)
   const [events, setEvents] = useState<AlertEvent[]>(INITIAL_EVENTS)
   const [createOpen, setCreateOpen] = useState(false)
@@ -151,7 +153,7 @@ export function MonitoringView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Active Rules</div>
+              <div className="text-xs text-muted-foreground">{t('monitoring.activeRules')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums">{rules.filter(r => r.enabled).length}</div>
             </div>
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10">
@@ -162,7 +164,7 @@ export function MonitoringView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Firing Alerts</div>
+              <div className="text-xs text-muted-foreground">{t('monitoring.firingAlerts')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums text-amber-600 dark:text-amber-400">{firingCount}</div>
             </div>
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/10">
@@ -173,7 +175,7 @@ export function MonitoringView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Critical</div>
+              <div className="text-xs text-muted-foreground">{t('monitoring.critical')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums text-rose-600 dark:text-rose-400">{criticalCount}</div>
             </div>
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-rose-500/10">
@@ -184,7 +186,7 @@ export function MonitoringView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Resolved (24h)</div>
+              <div className="text-xs text-muted-foreground">{t('monitoring.resolved24h')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums text-emerald-600 dark:text-emerald-400">{events.filter(e => e.status === 'resolved').length}</div>
             </div>
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10">
@@ -199,8 +201,8 @@ export function MonitoringView() {
         <Card className="p-5">
           <div className="mb-4 flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-semibold">Live Fleet Metrics</h3>
-              <p className="text-xs text-muted-foreground">Real-time averages across all running services</p>
+              <h3 className="text-sm font-semibold">{t('monitoring.liveFleetMetrics')}</h3>
+              <p className="text-xs text-muted-foreground">{t('monitoring.liveFleetMetricsDesc')}</p>
             </div>
             <Badge variant="outline" className="gap-1 text-[10px] border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
               <span className="h-1 w-1 rounded-full bg-emerald-500 animate-pulse" /> streaming
@@ -231,7 +233,7 @@ export function MonitoringView() {
       {/* Toolbar */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-sm font-semibold">Alert Rules</h2>
+          <h2 className="text-sm font-semibold">{t('monitoring.alertRules')}</h2>
           <p className="text-xs text-muted-foreground">{rules.length} rules configured · {rules.filter(r => r.enabled).length} active</p>
         </div>
         <Dialog open={createOpen} onOpenChange={setCreateOpen}>
@@ -242,12 +244,12 @@ export function MonitoringView() {
           </DialogTrigger>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>Create Alert Rule</DialogTitle>
+              <DialogTitle>{t('monitoring.createAlertRule')}</DialogTitle>
               <DialogDescription>Get notified when a metric crosses your threshold for a sustained period.</DialogDescription>
             </DialogHeader>
             <div className="space-y-3 py-2">
               <div>
-                <Label className="text-xs font-medium">Rule Name</Label>
+                <Label className="text-xs font-medium">{t('monitoring.ruleName')}</Label>
                 <Input
                   value={newRule.name}
                   onChange={(e) => setNewRule({ ...newRule, name: e.target.value })}
@@ -257,7 +259,7 @@ export function MonitoringView() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-xs font-medium">Metric</Label>
+                  <Label className="text-xs font-medium">{t('monitoring.metric')}</Label>
                   <Select value={newRule.metric} onValueChange={(v) => setNewRule({ ...newRule, metric: v as AlertRule['metric'] })}>
                     <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -268,7 +270,7 @@ export function MonitoringView() {
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-xs font-medium">Operator</Label>
+                  <Label className="text-xs font-medium">{t('monitoring.operator')}</Label>
                   <Select value={newRule.operator} onValueChange={(v) => setNewRule({ ...newRule, operator: v as AlertRule['operator'] })}>
                     <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -282,7 +284,7 @@ export function MonitoringView() {
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <Label className="text-xs font-medium">Threshold</Label>
+                  <Label className="text-xs font-medium">{t('monitoring.threshold')}</Label>
                   <Input
                     type="number"
                     value={newRule.threshold}
@@ -291,7 +293,7 @@ export function MonitoringView() {
                   />
                 </div>
                 <div>
-                  <Label className="text-xs font-medium">Duration (min)</Label>
+                  <Label className="text-xs font-medium">{t('monitoring.duration')}</Label>
                   <Input
                     type="number"
                     value={newRule.duration}
@@ -300,7 +302,7 @@ export function MonitoringView() {
                   />
                 </div>
                 <div>
-                  <Label className="text-xs font-medium">Severity</Label>
+                  <Label className="text-xs font-medium">{t('monitoring.severity')}</Label>
                   <Select value={newRule.severity} onValueChange={(v) => setNewRule({ ...newRule, severity: v as AlertRule['severity'] })}>
                     <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -313,7 +315,7 @@ export function MonitoringView() {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setCreateOpen(false)}>{t('common.cancel')}</Button>
               <Button onClick={handleCreate} className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
                 Create Rule
               </Button>
@@ -388,7 +390,7 @@ export function MonitoringView() {
         <div className="border-b border-border/60 bg-muted/30 px-5 py-3">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-semibold">Alert Events</h3>
+              <h3 className="text-sm font-semibold">{t('monitoring.alertEvents')}</h3>
               <p className="text-xs text-muted-foreground">Recent triggered alerts across all apps</p>
             </div>
             <Badge variant="outline" className="text-[10px]">{events.length} events</Badge>

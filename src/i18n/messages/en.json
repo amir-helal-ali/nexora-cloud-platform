@@ -423,5 +423,20 @@
     "documentation": "Documentation",
     "status": "Status",
     "support": "Support"
-  }
+  },
+  "backups": {},
+  "monitoring": {},
+  "audit": {},
+  "cdn": {},
+  "secrets": {},
+  "marketplace": {},
+  "billing": {},
+  "mesh": {},
+  "gateway": {},
+  "flags": {},
+  "analytics": {},
+  "simulator": {},
+  "deployments": {},
+  "logs2": {},
+  "pipelines": {}
 }

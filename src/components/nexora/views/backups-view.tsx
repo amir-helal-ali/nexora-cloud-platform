@@ -17,6 +17,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { DB_ENGINE_META, fmtBytes, fmtDate } from '@/lib/nexora'
+import { useI18n } from '@/hooks/use-i18n'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import {
@@ -70,6 +71,7 @@ const TYPE_META = {
 import { Camera } from 'lucide-react'
 
 export function BackupsView() {
+  const { t } = useI18n()
   const [backups, setBackups] = useState<Backup[]>(INITIAL_BACKUPS)
   const [filter, setFilter] = useState('all')
   const [createOpen, setCreateOpen] = useState(false)
@@ -129,7 +131,7 @@ export function BackupsView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Total Backups</div>
+              <div className="text-xs text-muted-foreground">{t('backups.totalBackups')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums">{backups.length}</div>
             </div>
             <Archive className="h-5 w-5 text-violet-500" />
@@ -138,7 +140,7 @@ export function BackupsView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Storage Used</div>
+              <div className="text-xs text-muted-foreground">{t('backups.storageUsed')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums">{fmtBytes(totalSize)}</div>
             </div>
             <HardDrive className="h-5 w-5 text-amber-500" />
@@ -147,7 +149,7 @@ export function BackupsView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Success Rate</div>
+              <div className="text-xs text-muted-foreground">{t('backups.successRate')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums text-emerald-600 dark:text-emerald-400">
                 {((backups.filter(b => b.status === 'completed').length / backups.length) * 100).toFixed(0)}%
               </div>
@@ -158,7 +160,7 @@ export function BackupsView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Auto Backups</div>
+              <div className="text-xs text-muted-foreground">{t('backups.autoBackups')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums">{backups.filter(b => b.type === 'automatic').length}</div>
             </div>
             <Clock className="h-5 w-5 text-sky-500" />
@@ -171,7 +173,7 @@ export function BackupsView() {
         <div className="bg-gradient-to-br from-violet-50 to-purple-50 p-5 dark:from-violet-950/30 dark:to-purple-950/30">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-semibold">Backup Storage</h3>
+              <h3 className="text-sm font-semibold">{t('backups.backupStorage')}</h3>
               <p className="text-xs text-muted-foreground">{fmtBytes(totalSize)} of {fmtBytes(storageQuotaMb)} used</p>
             </div>
             <Badge variant="outline" className="gap-1 text-[10px] border-violet-500/30 bg-violet-500/10 text-violet-700 dark:text-violet-300">
@@ -218,12 +220,12 @@ export function BackupsView() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Create Backup</DialogTitle>
+              <DialogTitle>{t('backups.createBackup')}</DialogTitle>
               <DialogDescription>Take a manual backup or snapshot of any database.</DialogDescription>
             </DialogHeader>
             <div className="space-y-3 py-2">
               <div>
-                <Label className="text-xs font-medium">Resource</Label>
+                <Label className="text-xs font-medium">{t('backups.resource')}</Label>
                 <Select value={newBackup.resource} onValueChange={(v) => setNewBackup({ ...newBackup, resource: v })}>
                   <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -236,7 +238,7 @@ export function BackupsView() {
                 </Select>
               </div>
               <div>
-                <Label className="text-xs font-medium">Backup Type</Label>
+                <Label className="text-xs font-medium">{t('backups.backupType')}</Label>
                 <Select value={newBackup.type} onValueChange={(v) => setNewBackup({ ...newBackup, type: v })}>
                   <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -247,7 +249,7 @@ export function BackupsView() {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setCreateOpen(false)}>{t('common.cancel')}</Button>
               <Button onClick={handleCreate} className="bg-gradient-to-br from-violet-500 to-purple-600 text-white">
                 <Archive className="h-4 w-4" /> Create Backup
               </Button>
