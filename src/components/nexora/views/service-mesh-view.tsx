@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useI18n } from '@/hooks/use-i18n'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import {
@@ -94,6 +95,7 @@ function fmtNum(n: number): string {
 }
 
 export function ServiceMeshView() {
+  const { t } = useI18n()
   const [edges, setEdges] = useState(EDGES)
   const [selectedNode, setSelectedNode] = useState<string | null>('gateway')
   const [mTLS, setMTLS] = useState(true)
@@ -129,7 +131,7 @@ export function ServiceMeshView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Services</div>
+              <div className="text-xs text-muted-foreground">{t('mesh.services')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums">{NODES.length}</div>
               <div className="text-[10px] text-emerald-600 dark:text-emerald-400">{healthyCount} healthy</div>
             </div>
@@ -139,7 +141,7 @@ export function ServiceMeshView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Connections</div>
+              <div className="text-xs text-muted-foreground">{t('mesh.connections')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums">{edges.length}</div>
               <div className="text-[10px] text-muted-foreground">active edges</div>
             </div>
@@ -149,7 +151,7 @@ export function ServiceMeshView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Total RPS</div>
+              <div className="text-xs text-muted-foreground">{t('mesh.totalRps')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums">{fmtNum(totalRps)}</div>
               <div className="text-[10px] text-muted-foreground">across mesh</div>
             </div>
@@ -159,7 +161,7 @@ export function ServiceMeshView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Avg Latency</div>
+              <div className="text-xs text-muted-foreground">{t('mesh.avgLatency')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums">{avgLatency.toFixed(1)}ms</div>
               <div className="text-[10px] text-muted-foreground">{totalErrors.toFixed(1)}% errors</div>
             </div>
@@ -170,9 +172,9 @@ export function ServiceMeshView() {
 
       <Tabs defaultValue="topology">
         <TabsList>
-          <TabsTrigger value="topology" className="text-xs">Topology</TabsTrigger>
-          <TabsTrigger value="policies" className="text-xs">Mesh Policies</TabsTrigger>
-          <TabsTrigger value="tracing" className="text-xs">Distributed Tracing</TabsTrigger>
+          <TabsTrigger value="topology" className="text-xs">{t('mesh.topology')}</TabsTrigger>
+          <TabsTrigger value="policies" className="text-xs">{t('mesh.meshPolicies')}</TabsTrigger>
+          <TabsTrigger value="tracing" className="text-xs">{t('mesh.distributedTracing')}</TabsTrigger>
         </TabsList>
 
         {/* Topology tab */}
@@ -182,7 +184,7 @@ export function ServiceMeshView() {
             <Card className="overflow-hidden lg:col-span-3">
               <div className="flex items-center justify-between border-b border-border/60 bg-muted/30 px-5 py-3">
                 <div>
-                  <h3 className="text-sm font-semibold">Service Mesh Topology</h3>
+                  <h3 className="text-sm font-semibold">{t('mesh.serviceMeshTopology')}</h3>
                   <p className="text-xs text-muted-foreground">Live traffic flow between services</p>
                 </div>
                 <div className="flex items-center gap-3 text-[10px]">
@@ -262,7 +264,7 @@ export function ServiceMeshView() {
 
             {/* Selected node details */}
             <Card className="p-5">
-              <h3 className="text-sm font-semibold">Service Details</h3>
+              <h3 className="text-sm font-semibold">{t('mesh.serviceDetails')}</h3>
               {selectedNodeData && (
                 <>
                   <div className="mt-3 flex items-center gap-3">
@@ -341,7 +343,7 @@ export function ServiceMeshView() {
                 <Shield className="h-5 w-5 text-violet-600 dark:text-violet-400" />
               </div>
               <div>
-                <h3 className="text-sm font-semibold">Istio Service Mesh</h3>
+                <h3 className="text-sm font-semibold">{t('mesh.istioServiceMesh')}</h3>
                 <p className="mt-0.5 text-xs text-muted-foreground">Sidecar proxy pattern with mTLS, traffic management, and observability built-in.</p>
               </div>
             </div>
@@ -372,7 +374,7 @@ export function ServiceMeshView() {
 
           <Card className="overflow-hidden">
             <div className="border-b border-border/60 bg-muted/30 px-5 py-3">
-              <h3 className="text-sm font-semibold">Traffic Policies</h3>
+              <h3 className="text-sm font-semibold">{t('mesh.trafficPolicies')}</h3>
             </div>
             <div className="divide-y divide-border/60">
               {[
@@ -402,7 +404,7 @@ export function ServiceMeshView() {
           <Card className="p-5">
             <div className="mb-3 flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-semibold">Distributed Tracing</h3>
+                <h3 className="text-sm font-semibold">{t('mesh.distributedTracing')}</h3>
                 <p className="text-xs text-muted-foreground">OpenTelemetry traces · last 5 requests</p>
               </div>
               <Badge variant="outline" className="gap-1 text-[10px] border-sky-500/30 bg-sky-500/10 text-sky-700 dark:text-sky-300">

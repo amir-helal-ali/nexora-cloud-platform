@@ -12,6 +12,7 @@ import {
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useI18n } from '@/hooks/use-i18n'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import {
@@ -114,6 +115,7 @@ function fmtDate(s: string): string {
 }
 
 export function BillingView() {
+  const { t } = useI18n()
   const [invoices] = useState<Invoice[]>(INVOICES)
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>(PAYMENT_METHODS)
   const [addCardOpen, setAddCardOpen] = useState(false)
@@ -141,7 +143,7 @@ export function BillingView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Current Plan</div>
+              <div className="text-xs text-muted-foreground">{t('billing.currentPlan')}</div>
               <div className="mt-1 flex items-center gap-1.5">
                 <Crown className={cn('h-5 w-5', currentPlan.color)} />
                 <span className="text-2xl font-bold">{currentPlan.name}</span>
@@ -154,7 +156,7 @@ export function BillingView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Next Billing</div>
+              <div className="text-xs text-muted-foreground">{t('billing.nextBilling')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums">{daysUntilBilling}d</div>
               <div className="text-[10px] text-muted-foreground">{fmtDate(nextBilling)}</div>
             </div>
@@ -164,7 +166,7 @@ export function BillingView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">YTD Spend</div>
+              <div className="text-xs text-muted-foreground">{t('billing.ytdSpend')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums">{fmtMoney(ytdSpent)}</div>
               <div className="flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400">
                 <TrendingUp className="h-2.5 w-2.5" /> +420% YoY
@@ -176,7 +178,7 @@ export function BillingView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Lifetime Spend</div>
+              <div className="text-xs text-muted-foreground">{t('billing.lifetimeSpend')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums">{fmtMoney(totalSpent)}</div>
               <div className="text-[10px] text-muted-foreground">{invoices.length} invoices</div>
             </div>
@@ -187,10 +189,10 @@ export function BillingView() {
 
       <Tabs defaultValue="overview">
         <TabsList>
-          <TabsTrigger value="overview" className="text-xs">Overview</TabsTrigger>
-          <TabsTrigger value="usage" className="text-xs">Usage</TabsTrigger>
+          <TabsTrigger value="overview" className="text-xs">{t('billing.overview')}</TabsTrigger>
+          <TabsTrigger value="usage" className="text-xs">{t('billing.usage')}</TabsTrigger>
           <TabsTrigger value="invoices" className="text-xs">Invoices ({invoices.length})</TabsTrigger>
-          <TabsTrigger value="payment" className="text-xs">Payment Methods</TabsTrigger>
+          <TabsTrigger value="payment" className="text-xs">{t('billing.paymentMethods')}</TabsTrigger>
         </TabsList>
 
         {/* Overview tab */}
@@ -230,7 +232,7 @@ export function BillingView() {
 
           {/* All plans comparison */}
           <Card className="p-5">
-            <h3 className="text-sm font-semibold">Available Plans</h3>
+            <h3 className="text-sm font-semibold">{t('billing.availablePlans')}</h3>
             <p className="text-xs text-muted-foreground">Compare features across tiers</p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {PLANS.map(plan => (
@@ -272,7 +274,7 @@ export function BillingView() {
             <div className="border-b border-border/60 bg-muted/30 px-5 py-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-semibold">Current Period Usage</h3>
+                  <h3 className="text-sm font-semibold">{t('billing.currentPeriodUsage')}</h3>
                   <p className="text-xs text-muted-foreground">Resets on {fmtDate(nextBilling)} · {daysUntilBilling} days left</p>
                 </div>
                 <Badge variant="outline" className="gap-1 text-[10px] border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
@@ -346,7 +348,7 @@ export function BillingView() {
           <Card className="overflow-hidden">
             <div className="border-b border-border/60 bg-muted/30 px-5 py-3">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold">Invoice History</h3>
+                <h3 className="text-sm font-semibold">{t('billing.invoiceHistory')}</h3>
                 <Button variant="outline" size="sm" onClick={() => toast.success('All invoices downloaded', { description: 'invoices-2025-2026.zip' })}>
                   <Download className="h-3.5 w-3.5" /> Download All
                 </Button>
@@ -436,7 +438,7 @@ export function BillingView() {
                 <Shield className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
               </div>
               <div>
-                <h4 className="text-sm font-semibold">Payment Security</h4>
+                <h4 className="text-sm font-semibold">{t('billing.paymentSecurity')}</h4>
                 <p className="mt-0.5 text-xs text-muted-foreground">
                   All payments are processed via Stripe with PCI DSS Level 1 compliance. We never store your card details on our servers.
                 </p>
@@ -467,7 +469,7 @@ export function BillingView() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setAddCardOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setAddCardOpen(false)}>{t('common.cancel')}</Button>
             <Button onClick={() => { toast.success('Card added', { description: 'New Visa ending in 1234' }); setAddCardOpen(false) }} className="bg-gradient-to-br from-violet-500 to-purple-600 text-white">
               Add Card
             </Button>
