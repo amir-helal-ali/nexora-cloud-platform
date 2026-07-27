@@ -106,7 +106,7 @@ function fmtTtl(secs: number): string {
 
 export function CdnView() {
   const { metrics } = useRealtime()
-  const { t } = useI18n()}
+  const { t } = useI18n()
   const [rules, setRules] = useState<CacheRule[]>(CACHE_RULES)
   const [purgeOpen, setPurgeOpen] = useState(false)
   const [purgeUrl, setPurgeUrl] = useState('')
