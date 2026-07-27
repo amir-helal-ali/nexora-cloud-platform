@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
+import { useI18n } from '@/hooks/use-i18n'
 import {
   GitBranch, GitCommit, GitPullRequest, CheckCircle2, XCircle, Clock,
   Play, Pause, SkipForward, RotateCw, Zap, Rocket, Hammer, Package,
@@ -142,6 +143,7 @@ function fmtDuration(secs: number): string {
 }
 
 export function PipelinesView() {
+  const { t } = useI18n()
   const [pipelines, setPipelines] = useState<Pipeline[]>(PIPELINES)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [autoRefresh, setAutoRefresh] = useState(true)
@@ -201,7 +203,7 @@ export function PipelinesView() {
             <div className="flex items-center gap-2">
               <GitPullRequest className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
               <h3 className="text-sm font-semibold">CI/CD Pipelines</h3>
-              <Badge variant="outline" className="text-[10px]">GitHub Integration</Badge>
+              <Badge variant="outline" className="text-[10px]">{t('pipelines.githubIntegration')}</Badge>
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
               {pipelines.length} pipelines · {pipelines.filter(p => p.status === 'running').length} running · {pipelines.filter(p => p.status === 'success').length} succeeded · {pipelines.filter(p => p.status === 'failed').length} failed
@@ -281,7 +283,7 @@ export function PipelinesView() {
               {selectedId === p.id && (
                 <div className="border-t border-border/60 bg-muted/20 p-4">
                   <div className="mb-3 flex items-center justify-between">
-                    <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Pipeline Stages</h4>
+                    <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('pipelines.pipelineStages')}</h4>
                     <span className="text-[10px] text-muted-foreground">{p.stages.length} stages</span>
                   </div>
                   {/* Horizontal stage flow */}
@@ -323,7 +325,7 @@ export function PipelinesView() {
                   {/* Failed stage logs */}
                   {p.stages.find(s => s.status === 'failed' && s.logs) && (
                     <div className="mt-4">
-                      <div className="mb-1.5 text-[10px] font-semibold uppercase text-muted-foreground">Failure Logs</div>
+                      <div className="mb-1.5 text-[10px] font-semibold uppercase text-muted-foreground">{t('pipelines.failureLogs')}</div>
                       <pre className="overflow-x-auto rounded-md bg-slate-950 p-3 text-[11px] leading-relaxed text-rose-300">
 {p.stages.find(s => s.status === 'failed' && s.logs)?.logs?.join('\n')}
                       </pre>

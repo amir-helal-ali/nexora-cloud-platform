@@ -13,6 +13,7 @@ import {
   ScrollText, Search, Download, Pause, Play, Filter, Terminal,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useI18n } from '@/hooks/use-i18n'
 
 interface LogEntry {
   id: string
@@ -51,6 +52,7 @@ const LEVEL_BG: Record<string, string> = {
 }
 
 export function LogsView() {
+  const { t } = useI18n()
   const [logs, setLogs] = useState<LogEntry[]>([])
   const [deployments, setDeployments] = useState<Deployment[]>([])
   const [loading, setLoading] = useState(true)
@@ -121,17 +123,17 @@ export function LogsView() {
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search logs..."
+              placeholder={t('logs.searchLogs')}
               className="h-9 pl-9 font-mono text-xs"
             />
           </div>
           <Tabs value={filter} onValueChange={setFilter}>
             <TabsList className="h-8">
-              <TabsTrigger value="all" className="text-xs">All</TabsTrigger>
-              <TabsTrigger value="info" className="text-xs">Info</TabsTrigger>
-              <TabsTrigger value="warn" className="text-xs">Warn</TabsTrigger>
-              <TabsTrigger value="error" className="text-xs">Error</TabsTrigger>
-              <TabsTrigger value="debug" className="text-xs">Debug</TabsTrigger>
+              <TabsTrigger value="all" className="text-xs">{t('logs.all')}</TabsTrigger>
+              <TabsTrigger value="info" className="text-xs">{t('logs.info')}</TabsTrigger>
+              <TabsTrigger value="warn" className="text-xs">{t('logs.warn')}</TabsTrigger>
+              <TabsTrigger value="error" className="text-xs">{t('logs.error')}</TabsTrigger>
+              <TabsTrigger value="debug" className="text-xs">{t('logs.debug')}</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -161,7 +163,7 @@ export function LogsView() {
           <div className="flex items-center justify-between border-b border-border/60 bg-muted/30 px-4 py-2">
             <div className="flex items-center gap-2">
               <Terminal className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="text-xs font-semibold">Live Log Stream</span>
+              <span className="text-xs font-semibold">{t('logs.liveLogStream')}</span>
               {!paused && (
                 <Badge variant="outline" className="gap-1 text-[10px] border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
                   <span className="h-1 w-1 rounded-full bg-emerald-500 animate-pulse" /> streaming
@@ -210,7 +212,7 @@ export function LogsView() {
         {/* Recent deployments */}
         <Card className="overflow-hidden">
           <div className="border-b border-border/60 bg-muted/30 px-4 py-2">
-            <span className="text-xs font-semibold">Recent Deployments</span>
+            <span className="text-xs font-semibold">{t('logs.recentDeployments')}</span>
           </div>
           <div className="max-h-[600px] divide-y divide-border/40 overflow-y-auto">
             {deployments.map(d => {

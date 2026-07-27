@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useRealtime } from '@/hooks/use-realtime'
+import { useI18n } from '@/hooks/use-i18n'
 import { RUNTIME_META, fmtDate, fmtDuration } from '@/lib/nexora'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -41,6 +42,7 @@ const STAGES = ['queued', 'cloning', 'installing', 'building', 'deploying', 'liv
 
 export function DeploymentsView() {
   const { appStatusEvents } = useRealtime()
+  const { t } = useI18n()}
   const [deployments, setDeployments] = useState<Deployment[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
@@ -84,16 +86,16 @@ export function DeploymentsView() {
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by commit or app name..."
+              placeholder={t('deployments.searchPlaceholder')}
               className="h-9 pl-9"
             />
           </div>
           <Tabs value={filter} onValueChange={setFilter}>
             <TabsList className="h-8">
               <TabsTrigger value="all" className="text-xs">All ({deployments.length})</TabsTrigger>
-              <TabsTrigger value="success" className="text-xs">Success</TabsTrigger>
-              <TabsTrigger value="failed" className="text-xs">Failed</TabsTrigger>
-              <TabsTrigger value="building" className="text-xs">Building</TabsTrigger>
+              <TabsTrigger value="success" className="text-xs">{t('deployments.success')}</TabsTrigger>
+              <TabsTrigger value="failed" className="text-xs">{t('deployments.failed')}</TabsTrigger>
+              <TabsTrigger value="building" className="text-xs">{t('deployments.building')}</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>

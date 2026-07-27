@@ -10,6 +10,7 @@ import { Switch } from '@/components/ui/switch'
 import { Input } from '@/components/ui/input'
 import { Sparkline } from '@/components/nexora/sparkline'
 import { useRealtime } from '@/hooks/use-realtime'
+import { useI18n } from '@/hooks/use-i18n'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import {
@@ -35,6 +36,7 @@ interface SimulationState {
 
 export function ScalingSimulatorView() {
   const { metrics } = useRealtime()
+  const { t } = useI18n()}
   const [running, setRunning] = useState(true)
   const [autoScale, setAutoScale] = useState(true)
   const [targetCpu, setTargetCpu] = useState(70)
@@ -183,7 +185,7 @@ export function ScalingSimulatorView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Active Instances</div>
+              <div className="text-xs text-muted-foreground">{t('simulator.activeInstances')}</div>
               <div className="mt-1 flex items-baseline gap-1">
                 <span className="text-2xl font-bold tabular-nums">{sim.instances}</span>
                 <span className="text-xs text-muted-foreground">/ {maxInstances} max</span>
@@ -207,7 +209,7 @@ export function ScalingSimulatorView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">CPU per Instance</div>
+              <div className="text-xs text-muted-foreground">{t('simulator.cpuPerInstance')}</div>
               <div className={cn('mt-1 text-2xl font-bold tabular-nums', sim.cpuPerInstance > 85 ? 'text-rose-600 dark:text-rose-400' : sim.cpuPerInstance > 70 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400')}>
                 {sim.cpuPerInstance.toFixed(1)}%
               </div>
@@ -228,7 +230,7 @@ export function ScalingSimulatorView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Avg Latency</div>
+              <div className="text-xs text-muted-foreground">{t('simulator.avgLatency')}</div>
               <div className={cn('mt-1 text-2xl font-bold tabular-nums', sim.avgLatency > 300 ? 'text-rose-600 dark:text-rose-400' : sim.avgLatency > 150 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400')}>
                 {sim.avgLatency.toFixed(0)}ms
               </div>
@@ -245,7 +247,7 @@ export function ScalingSimulatorView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Cost (hourly)</div>
+              <div className="text-xs text-muted-foreground">{t('simulator.costHourly')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums">${sim.cost.toFixed(2)}</div>
               <div className="text-[10px] text-muted-foreground">${(sim.cost * 24 * 30).toFixed(0)}/month</div>
             </div>
@@ -257,7 +259,7 @@ export function ScalingSimulatorView() {
       <div className="grid gap-4 lg:grid-cols-3">
         {/* Charts */}
         <Card className="p-5 lg:col-span-2">
-          <h3 className="text-sm font-semibold">Live Simulation</h3>
+          <h3 className="text-sm font-semibold">{t('simulator.liveSimulation')}</h3>
           <p className="text-xs text-muted-foreground">Real-time metrics · last 60 ticks (2s each)</p>
           <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div className="rounded-lg border border-violet-500/20 bg-violet-500/5 p-3">
@@ -300,13 +302,13 @@ export function ScalingSimulatorView() {
 
         {/* Controls */}
         <Card className="p-5">
-          <h3 className="text-sm font-semibold">Scaling Configuration</h3>
+          <h3 className="text-sm font-semibold">{t('simulator.scalingConfiguration')}</h3>
           <p className="text-xs text-muted-foreground">Tune auto-scaling rules</p>
 
           <div className="mt-4 space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <Label className="text-xs font-medium">Auto-scaling</Label>
+                <Label className="text-xs font-medium">{t('simulator.autoScaling')}</Label>
                 <p className="text-[10px] text-muted-foreground">Automatically add/remove instances</p>
               </div>
               <Switch checked={autoScale} onCheckedChange={setAutoScale} />
@@ -314,7 +316,7 @@ export function ScalingSimulatorView() {
 
             <div>
               <div className="mb-1.5 flex items-center justify-between">
-                <Label className="text-xs font-medium">Target CPU</Label>
+                <Label className="text-xs font-medium">{t('simulator.targetCpu')}</Label>
                 <span className="text-xs font-semibold tabular-nums">{targetCpu}%</span>
               </div>
               <Slider
@@ -330,7 +332,7 @@ export function ScalingSimulatorView() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs font-medium">Min Instances</Label>
+                <Label className="text-xs font-medium">{t('simulator.minInstances')}</Label>
                 <Input
                   type="number"
                   value={minInstances}
@@ -341,7 +343,7 @@ export function ScalingSimulatorView() {
                 />
               </div>
               <div>
-                <Label className="text-xs font-medium">Max Instances</Label>
+                <Label className="text-xs font-medium">{t('simulator.maxInstances')}</Label>
                 <Input
                   type="number"
                   value={maxInstances}
@@ -355,7 +357,7 @@ export function ScalingSimulatorView() {
 
             <div>
               <div className="mb-1.5 flex items-center justify-between">
-                <Label className="text-xs font-medium">Traffic Multiplier</Label>
+                <Label className="text-xs font-medium">{t('simulator.trafficMultiplier')}</Label>
                 <span className="text-xs font-semibold tabular-nums">{trafficMultiplier}x</span>
               </div>
               <Slider
@@ -391,7 +393,7 @@ export function ScalingSimulatorView() {
 
       {/* Preset scenarios */}
       <Card className="p-5">
-        <h3 className="text-sm font-semibold">Preset Scenarios</h3>
+        <h3 className="text-sm font-semibold">{t('simulator.presetScenarios')}</h3>
         <p className="text-xs text-muted-foreground">Test how your fleet handles real-world situations</p>
         <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {[

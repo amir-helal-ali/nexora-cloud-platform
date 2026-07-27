@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Sparkline } from '@/components/nexora/sparkline'
 import { useRealtime } from '@/hooks/use-realtime'
+import { useI18n } from '@/hooks/use-i18n'
 import { RUNTIME_META, fmtNum, fmtBytes } from '@/lib/nexora'
 import { cn } from '@/lib/utils'
 import {
@@ -101,6 +102,7 @@ function DonutChart({ segments, size = 120 }: { segments: { label: string; value
 
 export function AnalyticsView() {
   const { metrics } = useRealtime()
+  const { t } = useI18n()}
   const cpuHist = metrics?.history.cpu ?? []
   const memHist = metrics?.history.memory ?? []
   const rpsHist = metrics?.history.rps ?? []
@@ -113,7 +115,7 @@ export function AnalyticsView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Requests (24h)</div>
+              <div className="text-xs text-muted-foreground">{t('analytics.requests24h')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums">8.42M</div>
               <div className="mt-0.5 flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400">
                 <TrendingUp className="h-2.5 w-2.5" /> +12.4% vs yesterday
@@ -125,7 +127,7 @@ export function AnalyticsView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Unique Visitors</div>
+              <div className="text-xs text-muted-foreground">{t('analytics.uniqueVisitors')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums">142.8K</div>
               <div className="mt-0.5 flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400">
                 <TrendingUp className="h-2.5 w-2.5" /> +8.2%
@@ -137,7 +139,7 @@ export function AnalyticsView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Avg Response Time</div>
+              <div className="text-xs text-muted-foreground">{t('analytics.avgResponseTime')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums">84ms</div>
               <div className="mt-0.5 flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400">
                 <TrendingDown className="h-2.5 w-2.5" /> -6.3% (faster)
@@ -149,7 +151,7 @@ export function AnalyticsView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Bandwidth (24h)</div>
+              <div className="text-xs text-muted-foreground">{t('analytics.bandwidth24h')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums">1.24 TB</div>
               <div className="mt-0.5 flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400">
                 <TrendingUp className="h-2.5 w-2.5" /> +18.7%
@@ -162,10 +164,10 @@ export function AnalyticsView() {
 
       <Tabs defaultValue="traffic">
         <TabsList>
-          <TabsTrigger value="traffic" className="text-xs">Traffic</TabsTrigger>
-          <TabsTrigger value="performance" className="text-xs">Performance</TabsTrigger>
-          <TabsTrigger value="geography" className="text-xs">Geography</TabsTrigger>
-          <TabsTrigger value="devices" className="text-xs">Devices</TabsTrigger>
+          <TabsTrigger value="traffic" className="text-xs">{t('analytics.traffic')}</TabsTrigger>
+          <TabsTrigger value="performance" className="text-xs">{t('analytics.performance')}</TabsTrigger>
+          <TabsTrigger value="geography" className="text-xs">{t('analytics.geography')}</TabsTrigger>
+          <TabsTrigger value="devices" className="text-xs">{t('analytics.devices')}</TabsTrigger>
         </TabsList>
 
         {/* Traffic tab */}
@@ -174,7 +176,7 @@ export function AnalyticsView() {
             <Card className="p-5 lg:col-span-2">
               <div className="mb-4 flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-semibold">Requests per hour</h3>
+                  <h3 className="text-sm font-semibold">{t('analytics.requestsPerHour')}</h3>
                   <p className="text-xs text-muted-foreground">Last 24 hours · all apps</p>
                 </div>
                 <Badge variant="outline" className="text-[10px]">8.42M total</Badge>
@@ -193,7 +195,7 @@ export function AnalyticsView() {
             </Card>
 
             <Card className="p-5">
-              <h3 className="text-sm font-semibold">Traffic by Runtime</h3>
+              <h3 className="text-sm font-semibold">{t('analytics.trafficByRuntime')}</h3>
               <p className="text-xs text-muted-foreground">Last 24 hours</p>
               <div className="mt-4">
                 <DonutChart
@@ -211,7 +213,7 @@ export function AnalyticsView() {
           {/* Top endpoints */}
           <Card className="overflow-hidden">
             <div className="border-b border-border/60 bg-muted/30 px-5 py-3">
-              <h3 className="text-sm font-semibold">Top Endpoints (24h)</h3>
+              <h3 className="text-sm font-semibold">{t('analytics.topEndpoints')}</h3>
             </div>
             <div className="divide-y divide-border/60">
               {[
@@ -253,7 +255,7 @@ export function AnalyticsView() {
           <div className="grid gap-4 lg:grid-cols-2">
             <Card className="p-5">
               <div className="mb-3 flex items-center justify-between">
-                <h3 className="text-sm font-semibold">CPU Usage Trend</h3>
+                <h3 className="text-sm font-semibold">{t('analytics.cpuUsageTrend')}</h3>
                 <span className="text-xs text-muted-foreground">avg {(cpuHist[cpuHist.length - 1] || 0).toFixed(1)}%</span>
               </div>
               <Sparkline values={cpuHist} color="#10b981" width={500} height={100} className="w-full" />
@@ -265,7 +267,7 @@ export function AnalyticsView() {
             </Card>
             <Card className="p-5">
               <div className="mb-3 flex items-center justify-between">
-                <h3 className="text-sm font-semibold">Memory Usage Trend</h3>
+                <h3 className="text-sm font-semibold">{t('analytics.memoryUsageTrend')}</h3>
                 <span className="text-xs text-muted-foreground">avg {(memHist[memHist.length - 1] || 0).toFixed(1)}%</span>
               </div>
               <Sparkline values={memHist} color="#0ea5e9" width={500} height={100} className="w-full" />
@@ -279,7 +281,7 @@ export function AnalyticsView() {
 
           {/* Response time distribution */}
           <Card className="p-5">
-            <h3 className="text-sm font-semibold">Response Time Distribution</h3>
+            <h3 className="text-sm font-semibold">{t('analytics.responseTimeDistribution')}</h3>
             <p className="text-xs text-muted-foreground">Last 24 hours · 8.42M requests</p>
             <div className="mt-4">
               <BarChart
@@ -307,7 +309,7 @@ export function AnalyticsView() {
         <TabsContent value="geography" className="space-y-4">
           <div className="grid gap-4 lg:grid-cols-2">
             <Card className="p-5">
-              <h3 className="text-sm font-semibold">Top Countries</h3>
+              <h3 className="text-sm font-semibold">{t('analytics.topCountries')}</h3>
               <p className="text-xs text-muted-foreground">By request volume · 24h</p>
               <div className="mt-4 space-y-2">
                 {[
@@ -336,7 +338,7 @@ export function AnalyticsView() {
             </Card>
 
             <Card className="p-5">
-              <h3 className="text-sm font-semibold">Regions & Latency</h3>
+              <h3 className="text-sm font-semibold">{t('analytics.regionsLatency')}</h3>
               <p className="text-xs text-muted-foreground">Average response time by Nexora region</p>
               <div className="mt-4 space-y-3">
                 {[
@@ -385,7 +387,7 @@ export function AnalyticsView() {
             </Card>
 
             <Card className="p-5">
-              <h3 className="text-sm font-semibold">Browsers</h3>
+              <h3 className="text-sm font-semibold">{t('analytics.browsers')}</h3>
               <p className="text-xs text-muted-foreground">By request volume</p>
               <div className="mt-4 space-y-2.5">
                 {[
@@ -411,7 +413,7 @@ export function AnalyticsView() {
             </Card>
 
             <Card className="p-5">
-              <h3 className="text-sm font-semibold">Operating Systems</h3>
+              <h3 className="text-sm font-semibold">{t('analytics.operatingSystems')}</h3>
               <p className="text-xs text-muted-foreground">By request volume</p>
               <div className="mt-4 space-y-2.5">
                 {[
@@ -436,7 +438,7 @@ export function AnalyticsView() {
           {/* Top referrers */}
           <Card className="overflow-hidden">
             <div className="border-b border-border/60 bg-muted/30 px-5 py-3">
-              <h3 className="text-sm font-semibold">Top Referrers</h3>
+              <h3 className="text-sm font-semibold">{t('analytics.topReferrers')}</h3>
             </div>
             <div className="divide-y divide-border/60">
               {[
