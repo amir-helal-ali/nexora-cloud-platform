@@ -27,7 +27,9 @@ services:
       - REALTIME_PORT=3003
       - REALTIME_URL=http://realtime:3003
       - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
-      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-change-me-in-production}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-change-me-in-production-32chars}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-0000000000000000000000000000000000000000000000000000000000000000}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3000}
       # Add your external integrations below:
       # - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
       # - OPENAI_API_KEY=${OPENAI_API_KEY}
@@ -40,7 +42,7 @@ services:
     networks:
       - nexora-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/stats"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3

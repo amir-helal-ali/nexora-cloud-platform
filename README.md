@@ -121,11 +121,15 @@ Nexora Cloud is a production-ready, multi-tenant hosting platform that brings to
 |-------|-----------|
 | **Frontend** | Next.js 16, React 19, TypeScript 5, Tailwind CSS 4, shadcn/ui |
 | **Backend** | Next.js API Routes (Node.js runtime) |
+| **Authentication** | NextAuth.js v4 (credentials provider, bcrypt, JWT sessions) |
 | **Realtime** | Socket.io 4 (mini-service on port 3003) |
 | **Database** | Prisma ORM + SQLite (default) / PostgreSQL (production) |
+| **Security** | Zod validation, rate limiting, AES-256-GCM encryption, audit logging |
 | **Reverse Proxy** | Caddy 2 (auto HTTPS, HTTP/3) |
 | **Containerization** | Docker (multi-stage builds, Alpine Linux) |
-| **CI/CD** | GitHub Actions |
+| **CI/CD** | GitHub Actions (lint, test, build, security, docker) |
+| **Testing** | Vitest (59 unit tests) |
+| **i18n** | Custom (Arabic + English, RTL/LTR) |
 | **State** | Zustand (client), TanStack Query (server) |
 
 ---
@@ -136,13 +140,19 @@ Nexora Cloud is a production-ready, multi-tenant hosting platform that brings to
 
 ```bash
 # Clone the repository
-git clone https://github.com/nexora-cloud/platform.git
-cd platform
+git clone https://github.com/amir-helal-ali/nexora-cloud-platform.git
+cd nexora-cloud-platform
 
 # Copy environment file
 cp .env.example .env
 
-# (Optional) Edit environment variables
+# IMPORTANT: Generate secure secrets for production
+# Generate NEXTAUTH_SECRET:
+openssl rand -base64 32
+# Generate ENCRYPTION_KEY:
+openssl rand -hex 32
+
+# Edit .env with your generated secrets
 nano .env
 
 # Start all services (dashboard + realtime)
@@ -155,11 +165,20 @@ docker compose ps
 docker compose logs -f nexora
 ```
 
-Open **http://localhost:3000** in your browser. The platform will:
+Open **http://localhost:3000** in your browser. You'll be redirected to `/login`.
+
+**Default login credentials** (from seed data):
+- **Email**: `owner@nexora.app`
+- **Password**: `admin123`
+
+> ⚠️ Change the default password immediately after first login in production!
+
+The platform will:
 1. Push the Prisma schema to SQLite
-2. Seed the database with sample data
+2. Seed the database with sample data (including the owner account)
 3. Start the realtime WebSocket service on port 3003
 4. Start the Next.js dashboard on port 3000
+5. Health check available at `http://localhost:3000/api/health`
 
 ### Option 2: With Caddy reverse proxy (production)
 

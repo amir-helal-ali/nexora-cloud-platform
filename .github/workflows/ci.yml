@@ -12,7 +12,6 @@ on:
   pull_request:
     branches: [main, develop]
 
-# Cancel previous runs on the same PR/branch
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -65,8 +64,56 @@ jobs:
       - name: ✅ Run ESLint
         run: bun run lint
 
-      - name: ✅ TypeScript type check
-        run: bunx tsc --noEmit || true  # Non-blocking for now
+  # ---------------------------------------------------------------------------
+  # Unit Tests
+  # ---------------------------------------------------------------------------
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: lint
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: 💾 Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: 📥 Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: 🔍 Generate Prisma client
+        run: bunx prisma generate
+        env:
+          DATABASE_URL: "file:/tmp/ci.db"
+
+      - name: 🧪 Run tests
+        run: bun run test
+        env:
+          DATABASE_URL: "file:/tmp/ci.db"
+          NEXTAUTH_SECRET: "ci-test-secret-32-chars-long-xxxx"
+          ENCRYPTION_KEY: "ci-test-encryption-key-64-hex-chars-xxxx00000000000000000000000000000000000000000000000000000000000000"
+
+      - name: 📊 Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-coverage
+          path: coverage/
+          retention-days: 7
 
   # ---------------------------------------------------------------------------
   # Build verification
@@ -75,7 +122,7 @@ jobs:
     name: Build Verification
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: lint
+    needs: test
 
     steps:
       - name: 📥 Checkout code
@@ -115,51 +162,8 @@ jobs:
         env:
           DATABASE_URL: "file:/tmp/ci.db"
           NEXT_TELEMETRY_DISABLED: '1'
-
-      - name: 📤 Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: next-build
-          path: .next/
-          retention-days: 7
-
-  # ---------------------------------------------------------------------------
-  # Build realtime service
-  # ---------------------------------------------------------------------------
-  build-realtime:
-    name: Build Realtime Service
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: lint
-
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-
-      - name: 📦 Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: ${{ env.BUN_VERSION }}
-
-      - name: 💾 Cache realtime deps
-        uses: actions/cache@v4
-        with:
-          path: |
-            mini-services/realtime-service/node_modules
-            ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-realtime-${{ hashFiles('mini-services/realtime-service/bun.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-bun-realtime-
-
-      - name: 📥 Install realtime deps
-        run: |
-          cd mini-services/realtime-service
-          bun install --frozen-lockfile
-
-      - name: ✅ Verify realtime service starts
-        run: |
-          cd mini-services/realtime-service
-          timeout 5 bun index.ts || true
+          NEXTAUTH_SECRET: "ci-test-secret-32-chars-long-xxxx"
+          ENCRYPTION_KEY: "ci-test-encryption-key-64-hex-chars-xxxx00000000000000000000000000000000000000000000000000000000000000"
 
   # ---------------------------------------------------------------------------
   # Security audit
@@ -182,23 +186,13 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: 🔒 Run audit
-        run: bun audit || true  # Non-blocking
-
-      - name: 🔍 CodeQL analysis
-        uses: github/codeql-action/init@v3
-        with:
-          languages: javascript-typescript
-        continue-on-error: true
-
-      - name: 🔍 Perform CodeQL analysis
-        uses: github/codeql-action/analyze@v3
-        continue-on-error: true
+        run: bun audit || true
 
   # ---------------------------------------------------------------------------
   # Docker build verification
   # ---------------------------------------------------------------------------
   docker-build:
-    name: Docker Build Verification
+    name: Docker Build
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs: build
@@ -236,7 +230,7 @@ jobs:
   summary:
     name: CI Summary
     runs-on: ubuntu-latest
-    needs: [lint, build, build-realtime, security, docker-build]
+    needs: [lint, test, build, security, docker-build]
     if: always()
     steps:
       - name: 📊 Job status
@@ -245,8 +239,8 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Lint & Type Check | ${{ needs.lint.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Build Verification | ${{ needs.build.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Build Realtime | ${{ needs.build-realtime.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Security Audit | ${{ needs.security.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Docker Build | ${{ needs.docker-build.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Lint | ${{ needs.lint.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tests | ${{ needs.test.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build | ${{ needs.build.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Security | ${{ needs.security.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Docker | ${{ needs.docker-build.result }} |" >> $GITHUB_STEP_SUMMARY

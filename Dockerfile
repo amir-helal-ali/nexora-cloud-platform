@@ -77,6 +77,13 @@ ENV HOSTNAME=0.0.0.0
 ENV DATABASE_URL="file:/app/data/nexora.db"
 ENV REALTIME_PORT=3003
 ENV REALTIME_URL="http://localhost:3003"
+# Auth — MUST be overridden in production
+ENV NEXTAUTH_SECRET="change-me-in-production-32chars"
+ENV NEXTAUTH_URL="http://localhost:3000"
+# Encryption — MUST be overridden in production
+ENV ENCRYPTION_KEY="0000000000000000000000000000000000000000000000000000000000000000"
+# CORS for realtime service
+ENV ALLOWED_ORIGINS="http://localhost:3000"
 
 # ---- Copy built Next.js standalone ----
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
@@ -107,7 +114,7 @@ EXPOSE 3000 3003
 
 # Health check for Next.js (every 30s, 3 retries)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD curl -f http://localhost:3000/api/stats || exit 1
+  CMD curl -f http://localhost:3000/api/health || exit 1
 
 # Use tini as PID 1 for proper signal handling
 ENTRYPOINT ["/sbin/tini", "--"]
