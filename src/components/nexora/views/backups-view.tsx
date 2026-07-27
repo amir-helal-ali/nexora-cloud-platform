@@ -72,28 +72,39 @@ import { Camera } from 'lucide-react'
 
 export function BackupsView() {
   const { t } = useI18n()
-  const [backups, setBackups] = useState<Backup[]>(INITIAL_BACKUPS)
+  const [backups, setBackups] = useState<Backup[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchBackups = async () => {
+    try {
+      const r = await fetch('/api/backups')
+      const d = await r.json()
+      setBackups(d.backups || [])
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { fetchBackups() }, [])
   const [filter, setFilter] = useState('all')
   const [createOpen, setCreateOpen] = useState(false)
   const [newBackup, setNewBackup] = useState({ resource: 'postgres-main', type: 'manual' })
 
-  const handleCreate = () => {
-    const backup: Backup = {
-      id: `bk_${Date.now()}`,
-      name: `${newBackup.resource}-${newBackup.type}-${Date.now()}`,
-      resourceType: 'database',
-      resourceName: newBackup.resource,
-      engine: 'postgresql',
-      sizeMb: 0,
-      status: 'queued',
-      type: newBackup.type as Backup['type'],
-      createdAt: new Date().toISOString(),
-      durationSec: 0,
-      retentionDays: newBackup.type === 'snapshot' ? 90 : 14,
-      expiresAt: new Date(Date.now() + (newBackup.type === 'snapshot' ? 90 : 14) * 86400000).toISOString(),
-      region: 'fra1',
+  const handleCreate = async () => {
+    const r = await fetch('/api/backups', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newBackup),
+    })
+    if (r.ok) {
+      toast.success('Backup queued', { description: `${newBackup.resource} backup is starting...` })
+      setCreateOpen(false)
+      fetchBackups()
+      // Refresh after backup completes
+      setTimeout(fetchBackups, 5000)
     }
-    setBackups([backup, ...backups])
     toast.success('Backup queued', { description: `${newBackup.resource} backup is starting...` })
     setCreateOpen(false)
     // Simulate completion
@@ -110,9 +121,10 @@ export function BackupsView() {
     }, 3000)
   }
 
-  const handleDelete = (id: string) => {
-    setBackups(backups.filter(b => b.id !== id))
+  const handleDelete = async (id: string) => {
+    await fetch(`/api/backups/${id}`, { method: 'DELETE' })
     toast.success('Backup deleted')
+    fetchBackups()
   }
 
   const handleDownload = (backup: Backup) => {

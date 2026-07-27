@@ -83,7 +83,22 @@ function fmtDate(s: string): string {
 
 export function SecretsView() {
   const { t } = useI18n()
-  const [secrets, setSecrets] = useState<Secret[]>(INITIAL_SECRETS)
+  const [secrets, setSecrets] = useState<Secret[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchSecrets = async () => {
+    try {
+      const r = await fetch('/api/secrets')
+      const d = await r.json()
+      setSecrets(d.secrets || [])
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { fetchSecrets() }, [])
   const [revealed, setRevealed] = useState<Set<string>>(new Set())
   const [createOpen, setCreateOpen] = useState(false)
   const [filter, setFilter] = useState('all')
@@ -105,38 +120,35 @@ export function SecretsView() {
     })
   }
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!newSecret.key.trim() || !newSecret.value.trim()) {
       toast.error('Key and value are required')
       return
     }
-    if (secrets.some(s => s.key === newSecret.key)) {
-      toast.error('A secret with this key already exists')
-      return
+    const r = await fetch('/api/secrets', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newSecret),
+    })
+    if (r.ok) {
+      toast.success('Secret created', { description: `${newSecret.key} added and encrypted` })
+      setCreateOpen(false)
+      setNewSecret({ key: '', value: '', type: 'string', environment: 'production', rotationDays: 90 })
+      fetchSecrets()
+    } else {
+      const err = await r.json().catch(() => ({}))
+      toast.error(err.error || 'Failed to create secret')
     }
-    const secret: Secret = {
-      id: `s${Date.now()}`,
-      key: newSecret.key.toUpperCase(),
-      value: newSecret.value,
-      type: newSecret.type,
-      scope: 'project',
-      scopeTarget: 'nexora-cloud',
-      environment: newSecret.environment,
-      encrypted: true,
-      lastRotated: new Date().toISOString().split('T')[0],
-      rotationDays: newSecret.rotationDays,
-      usedBy: [],
-      masked: true,
-    }
-    setSecrets([secret, ...secrets])
-    toast.success('Secret created', { description: `${secret.key} added and encrypted` })
-    setCreateOpen(false)
-    setNewSecret({ key: '', value: '', type: 'string', environment: 'production', rotationDays: 90 })
   }
 
-  const handleRotate = (s: Secret) => {
-    setSecrets(prev => prev.map(x => x.id === s.id ? { ...x, lastRotated: new Date().toISOString().split('T')[0] } : x))
-    toast.success('Secret rotated', { description: `${s.key} — new value applied to ${s.usedBy.length} apps` })
+  const handleRotate = async (s: Secret) => {
+    await fetch(`/api/secrets/${s.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rotated: true }),
+    })
+    toast.success('Secret rotated', { description: `${s.key} — new value applied` })
+    fetchSecrets()
   }
 
   const handleCopy = (s: Secret) => {
@@ -144,13 +156,15 @@ export function SecretsView() {
     toast.success('Secret copied to clipboard', { description: `${s.key} — will clear in 30s` })
   }
 
-  const handleDelete = (s: Secret) => {
-    if (s.usedBy.length > 0) {
-      toast.error('Cannot delete', { description: `Still used by ${s.usedBy.length} apps — remove references first` })
+  const handleDelete = async (s: Secret) => {
+    const usedBy = typeof s.usedBy === 'string' ? JSON.parse(s.usedBy) : s.usedBy
+    if (Array.isArray(usedBy) && usedBy.length > 0) {
+      toast.error('Cannot delete', { description: `Still used by ${usedBy.length} apps — remove references first` })
       return
     }
-    setSecrets(secrets.filter(x => x.id !== s.id))
+    await fetch(`/api/secrets/${s.id}`, { method: 'DELETE' })
     toast.success('Secret deleted', { description: s.key })
+    fetchSecrets()
   }
 
   const filtered = secrets.filter(s => {
@@ -373,7 +387,7 @@ export function SecretsView() {
                       </code>
                     </div>
                     <div className="mt-0.5 flex items-center gap-2 text-[10px] text-muted-foreground">
-                      <span>Used by {s.usedBy.length} app{s.usedBy.length !== 1 ? 's' : ''}</span>
+                      <span>Used by {(typeof s.usedBy === 'string' ? JSON.parse(s.usedBy || '[]') : s.usedBy).length} app{(typeof s.usedBy === 'string' ? JSON.parse(s.usedBy || '[]') : s.usedBy).length !== 1 ? 's' : ''}</span>
                       <span>·</span>
                       <span>Rotated {fmtDate(s.lastRotated)}</span>
                       {s.rotationDays > 0 && (<>

@@ -175,7 +175,22 @@ function fmtNum(n: number): string {
 
 export function FeatureFlagsView() {
   const { t } = useI18n()
-  const [flags, setFlags] = useState<FeatureFlag[]>(INITIAL_FLAGS)
+  const [flags, setFlags] = useState<FeatureFlag[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchFlags = async () => {
+    try {
+      const r = await fetch('/api/flags')
+      const d = await r.json()
+      setFlags(d.flags || [])
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { fetchFlags() }, [])
   const [tests, setTests] = useState<ABTest[]>(INITIAL_TESTS)
   const [createOpen, setCreateOpen] = useState(false)
   const [newFlag, setNewFlag] = useState({
@@ -186,52 +201,51 @@ export function FeatureFlagsView() {
     percentage: 0,
   })
 
-  const toggleFlag = (id: string) => {
-    setFlags(prev => prev.map(f => f.id === id ? { ...f, enabled: !f.enabled, lastUpdated: new Date().toISOString().split('T')[0] } : f))
+  const toggleFlag = async (id: string) => {
     const f = flags.find(x => x.id === id)
-    if (f) toast.success(`${f.name} ${f.enabled ? 'disabled' : 'enabled'}`, { description: `Change is live for all environments` })
+    if (!f) return
+    await fetch(`/api/flags/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ enabled: !f.enabled }),
+    })
+    toast.success(`${f.name} ${f.enabled ? 'disabled' : 'enabled'}`)
+    fetchFlags()
   }
 
   const updatePercentage = (id: string, percentage: number) => {
     setFlags(prev => prev.map(f => f.id === id ? { ...f, percentage, lastUpdated: new Date().toISOString().split('T')[0] } : f))
   }
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!newFlag.key.trim() || !newFlag.name.trim()) {
       toast.error('Key and name are required')
       return
     }
-    const flag: FeatureFlag = {
-      id: `f${Date.now()}`,
-      key: newFlag.key.toLowerCase().replace(/[^a-z0-9_]/g, '_'),
-      name: newFlag.name,
-      description: newFlag.description,
-      enabled: false,
-      type: newFlag.type,
-      percentage: newFlag.percentage,
-      variants: newFlag.type === 'variant' ? [
-        { name: 'control', weight: 50, description: 'Control variant' },
-        { name: 'variant_a', weight: 50, description: 'Variant A' },
-      ] : [],
-      environments: { production: false, staging: false, development: true },
-      targeting: [],
-      totalEvaluations: 0,
-      trueEvaluations: 0,
-      createdAt: new Date().toISOString().split('T')[0],
-      lastUpdated: new Date().toISOString().split('T')[0],
-      owner: 'Ahmed Hassan',
-      tags: [],
+    const r = await fetch('/api/flags', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newFlag),
+    })
+    if (r.ok) {
+      toast.success('Feature flag created', { description: newFlag.key })
+      setCreateOpen(false)
+      setNewFlag({ key: '', name: '', description: '', type: 'boolean', percentage: 0 })
+      fetchFlags()
+    } else {
+      const err = await r.json().catch(() => ({}))
+      toast.error(err.error || 'Failed to create flag')
     }
-    setFlags([flag, ...flags])
     toast.success('Feature flag created', { description: flag.key })
     setCreateOpen(false)
     setNewFlag({ key: '', name: '', description: '', type: 'boolean', percentage: 0 })
   }
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     const f = flags.find(x => x.id === id)
-    setFlags(flags.filter(x => x.id !== id))
+    await fetch(`/api/flags/${id}`, { method: 'DELETE' })
     toast.success('Flag deleted', { description: f?.name })
+    fetchFlags()
   }
 
   return (

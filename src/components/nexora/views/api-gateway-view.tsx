@@ -89,7 +89,22 @@ function fmtNum(n: number): string {
 
 export function ApiGatewayView() {
   const { t } = useI18n()
-  const [routes, setRoutes] = useState<GatewayRoute[]>(INITIAL_ROUTES)
+  const [routes, setRoutes] = useState<GatewayRoute[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchRoutes = async () => {
+    try {
+      const r = await fetch('/api/gateway')
+      const d = await r.json()
+      setRoutes(d.routes || [])
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { fetchRoutes() }, [])
   const [createOpen, setCreateOpen] = useState(false)
   const [selected, setSelected] = useState<GatewayRoute | null>(null)
   const [newRoute, setNewRoute] = useState({
@@ -119,46 +134,45 @@ export function ApiGatewayView() {
     return () => clearInterval(t)
   }, [])
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!newRoute.path.trim() || !newRoute.path.startsWith('/')) {
       toast.error('Path must start with /')
       return
     }
-    const route: GatewayRoute = {
-      id: `r${Date.now()}`,
-      path: newRoute.path,
-      method: newRoute.method,
-      targetApp: newRoute.targetApp,
-      targetPath: newRoute.targetPath,
-      status: 'active',
-      auth: newRoute.auth,
-      rateLimit: newRoute.rateLimit,
-      currentRps: 0,
-      totalRequests: 0,
-      avgLatency: 0,
-      errorRate: 0,
-      cacheEnabled: newRoute.cacheEnabled,
-      cacheTtl: newRoute.cacheEnabled ? 300 : 0,
-      corsEnabled: newRoute.corsEnabled,
-      retryPolicy: 2,
-      timeoutMs: newRoute.timeoutMs,
+    const r = await fetch('/api/gateway', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newRoute),
+    })
+    if (r.ok) {
+      toast.success('Route created', { description: `${newRoute.method} ${newRoute.path}` })
+      setCreateOpen(false)
+      setNewRoute({ path: '/api/v1/', method: 'GET', targetApp: 'rust-api-gateway', targetPath: '/', auth: 'api_key', rateLimit: 500, cacheEnabled: false, corsEnabled: true, timeoutMs: 5000 })
+      fetchRoutes()
+    } else {
+      const err = await r.json().catch(() => ({}))
+      toast.error(err.error || 'Failed to create route')
     }
-    setRoutes([route, ...routes])
-    toast.success('Route created', { description: `${newRoute.method} ${newRoute.path} → ${newRoute.targetApp}` })
-    setCreateOpen(false)
-    setNewRoute({ path: '/api/v1/', method: 'GET', targetApp: 'rust-api-gateway', targetPath: '/', auth: 'api_key', rateLimit: 500, cacheEnabled: false, corsEnabled: true, timeoutMs: 5000 })
   }
 
-  const toggleRoute = (id: string) => {
-    setRoutes(routes.map(r => r.id === id ? { ...r, status: r.status === 'active' ? 'paused' : 'active' } : r))
+  const toggleRoute = async (id: string) => {
     const route = routes.find(r => r.id === id)
-    if (route) toast.success(`${route.path} ${route.status === 'active' ? 'paused' : 'activated'}`)
+    if (!route) return
+    const newStatus = route.status === 'active' ? 'paused' : 'active'
+    await fetch(`/api/gateway/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus }),
+    })
+    toast.success(`${route.path} ${newStatus === 'active' ? 'activated' : 'paused'}`)
+    fetchRoutes()
   }
 
-  const deleteRoute = (id: string) => {
+  const deleteRoute = async (id: string) => {
     const route = routes.find(r => r.id === id)
-    setRoutes(routes.filter(r => r.id !== id))
+    await fetch(`/api/gateway/${id}`, { method: 'DELETE' })
     toast.success('Route deleted', { description: route?.path })
+    fetchRoutes()
   }
 
   const activeRoutes = routes.filter(r => r.status === 'active').length

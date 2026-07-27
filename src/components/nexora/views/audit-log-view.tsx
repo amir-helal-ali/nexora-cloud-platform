@@ -95,7 +95,22 @@ function fmtDate(s: string): string {
 
 export function AuditLogView() {
   const { t } = useI18n()
-  const [events, setEvents] = useState<AuditEvent[]>(INITIAL_EVENTS)
+  const [events, setEvents] = useState<AuditEvent[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchEvents = async () => {
+    try {
+      const r = await fetch('/api/audit')
+      const d = await r.json()
+      setEvents(d.logs || [])
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { fetchEvents() }, [])
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [resultFilter, setResultFilter] = useState('all')
