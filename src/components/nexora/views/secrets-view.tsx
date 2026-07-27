@@ -16,6 +16,7 @@ import {
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useI18n } from '@/hooks/use-i18n'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import {
@@ -81,6 +82,7 @@ function fmtDate(s: string): string {
 }
 
 export function SecretsView() {
+  const { t } = useI18n()
   const [secrets, setSecrets] = useState<Secret[]>(INITIAL_SECRETS)
   const [revealed, setRevealed] = useState<Set<string>>(new Set())
   const [createOpen, setCreateOpen] = useState(false)
@@ -171,7 +173,7 @@ export function SecretsView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Total Secrets</div>
+              <div className="text-xs text-muted-foreground">{t('secrets.totalSecrets')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums">{secrets.length}</div>
             </div>
             <KeyRound className="h-5 w-5 text-violet-500" />
@@ -180,7 +182,7 @@ export function SecretsView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Encrypted</div>
+              <div className="text-xs text-muted-foreground">{t('secrets.encrypted')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums text-emerald-600 dark:text-emerald-400">{encryptedCount}</div>
             </div>
             <ShieldCheck className="h-5 w-5 text-emerald-500" />
@@ -189,7 +191,7 @@ export function SecretsView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Need Rotation</div>
+              <div className="text-xs text-muted-foreground">{t('secrets.needRotation')}</div>
               <div className={cn('mt-1 text-2xl font-bold tabular-nums', rotatingSoon > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400')}>{rotatingSoon}</div>
             </div>
             <RefreshCw className="h-5 w-5 text-amber-500" />
@@ -198,7 +200,7 @@ export function SecretsView() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs text-muted-foreground">Apps Using Secrets</div>
+              <div className="text-xs text-muted-foreground">{t('secrets.appsUsingSecrets')}</div>
               <div className="mt-1 text-2xl font-bold tabular-nums">{new Set(secrets.flatMap(s => s.usedBy)).size}</div>
             </div>
             <Server className="h-5 w-5 text-sky-500" />
@@ -214,7 +216,7 @@ export function SecretsView() {
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold">End-to-end encryption enabled</span>
+              <span className="text-sm font-semibold">{t('secrets.endToEndEncryption')}</span>
               <Badge variant="outline" className="text-[10px] border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">AES-256-GCM</Badge>
             </div>
             <p className="mt-0.5 text-xs text-muted-foreground">
@@ -233,7 +235,7 @@ export function SecretsView() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search secrets..."
+            placeholder={t('secrets.searchSecrets')}
             className="h-9 max-w-xs font-mono text-sm"
           />
           <div className="flex gap-1.5 overflow-x-auto">
@@ -263,12 +265,12 @@ export function SecretsView() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add New Secret</DialogTitle>
+              <DialogTitle>{t('secrets.createSecret')}</DialogTitle>
               <DialogDescription>Secrets are encrypted immediately and never logged.</DialogDescription>
             </DialogHeader>
             <div className="space-y-3 py-2">
               <div>
-                <Label className="text-xs font-medium">Key (UPPER_SNAKE_CASE)</Label>
+                <Label className="text-xs font-medium">{t('secrets.key')}</Label>
                 <Input
                   value={newSecret.key}
                   onChange={(e) => setNewSecret({ ...newSecret, key: e.target.value.toUpperCase().replace(/[^A-Z0-9_]/g, '_') })}
@@ -277,7 +279,7 @@ export function SecretsView() {
                 />
               </div>
               <div>
-                <Label className="text-xs font-medium">Value</Label>
+                <Label className="text-xs font-medium">{t('secrets.value')}</Label>
                 <Input
                   value={newSecret.value}
                   onChange={(e) => setNewSecret({ ...newSecret, value: e.target.value })}
@@ -288,7 +290,7 @@ export function SecretsView() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-xs font-medium">Type</Label>
+                  <Label className="text-xs font-medium">{t('secrets.type')}</Label>
                   <Select value={newSecret.type} onValueChange={(v) => setNewSecret({ ...newSecret, type: v as Secret['type'] })}>
                     <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -302,7 +304,7 @@ export function SecretsView() {
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-xs font-medium">Environment</Label>
+                  <Label className="text-xs font-medium">{t('secrets.environment')}</Label>
                   <Select value={newSecret.environment} onValueChange={(v) => setNewSecret({ ...newSecret, environment: v as Secret['environment'] })}>
                     <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -315,7 +317,7 @@ export function SecretsView() {
                 </div>
               </div>
               <div>
-                <Label className="text-xs font-medium">Auto-rotation (days, 0 = off)</Label>
+                <Label className="text-xs font-medium">{t('secrets.autoRotation')}</Label>
                 <Input
                   type="number"
                   value={newSecret.rotationDays}
@@ -325,7 +327,7 @@ export function SecretsView() {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setCreateOpen(false)}>{t('common.cancel')}</Button>
               <Button onClick={handleCreate} className="bg-gradient-to-br from-violet-500 to-purple-600 text-white">
                 <Lock className="h-4 w-4" /> Encrypt & Save
               </Button>

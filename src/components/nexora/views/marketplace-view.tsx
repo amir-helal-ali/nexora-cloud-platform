@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog'
+import { useI18n } from '@/hooks/use-i18n'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import {
@@ -94,6 +95,7 @@ const CATEGORIES = [
 ]
 
 export function MarketplaceView() {
+  const { t } = useI18n()
   const [integrations, setIntegrations] = useState<Integration[]>(INTEGRATIONS)
   const [filter, setFilter] = useState('all')
   const [search, setSearch] = useState('')
@@ -133,7 +135,7 @@ export function MarketplaceView() {
           <div className="relative flex items-center justify-between">
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-2xl font-bold tracking-tight">Marketplace</h2>
+                <h2 className="text-2xl font-bold tracking-tight">{t('marketplace.title')}</h2>
                 <Badge variant="outline" className="border-violet-500/30 bg-violet-500/10 text-violet-700 dark:text-violet-300">
                   {integrations.length} integrations
                 </Badge>
@@ -151,7 +153,7 @@ export function MarketplaceView() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search integrations..."
+            placeholder={t('marketplace.searchIntegrations')}
             className="h-9 pl-9"
           />
         </div>
@@ -298,7 +300,7 @@ export function MarketplaceView() {
                   </>
                 ) : (
                   <>
-                    <Button variant="outline" onClick={() => setSelected(null)}>Cancel</Button>
+                    <Button variant="outline" onClick={() => setSelected(null)}>{t('common.cancel')}</Button>
                     <Button
                       onClick={() => handleInstall(selected)}
                       disabled={installing}
