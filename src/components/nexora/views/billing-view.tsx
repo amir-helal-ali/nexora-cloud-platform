@@ -116,8 +116,26 @@ function fmtDate(s: string): string {
 
 export function BillingView() {
   const { t } = useI18n()
-  const [invoices] = useState<Invoice[]>(INVOICES)
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>(PAYMENT_METHODS)
+  const [invoices, setInvoices] = useState<Invoice[]>([])
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
+  const [usage, setUsage] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+
+  const fetchBilling = async () => {
+    try {
+      const r = await fetch('/api/billing')
+      const d = await r.json()
+      setInvoices(d.invoices || [])
+      setPaymentMethods(d.paymentMethods || [])
+      setUsage(d.usage || null)
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { fetchBilling() }, [])
   const [addCardOpen, setAddCardOpen] = useState(false)
 
   const currentPlan = PLANS.find(p => p.current) || PLANS[3]

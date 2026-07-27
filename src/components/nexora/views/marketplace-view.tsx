@@ -96,7 +96,22 @@ const CATEGORIES = [
 
 export function MarketplaceView() {
   const { t } = useI18n()
-  const [integrations, setIntegrations] = useState<Integration[]>(INTEGRATIONS)
+  const [integrations, setIntegrations] = useState<Integration[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchIntegrations = async () => {
+    try {
+      const r = await fetch('/api/marketplace')
+      const d = await r.json()
+      setIntegrations(d.integrations || [])
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { fetchIntegrations() }, [])
   const [filter, setFilter] = useState('all')
   const [search, setSearch] = useState('')
   const [showOnlyInstalled, setShowOnlyInstalled] = useState(false)
@@ -110,17 +125,27 @@ export function MarketplaceView() {
     return true
   })
 
-  const handleInstall = (i: Integration) => {
+  const handleInstall = async (i: Integration) => {
     setInstalling(true)
-    setTimeout(() => {
+    const r = await fetch('/api/marketplace', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ integrationId: i.id, action: 'install' }),
+    })
+    if (r.ok) {
       setIntegrations(prev => prev.map(x => x.id === i.id ? { ...x, installed: true } : x))
       setSelected(null)
-      setInstalling(false)
       toast.success(`${i.name} installed`, { description: 'Configure it in Settings → Integrations' })
-    }, 2000)
+      setInstalling(false)
+    }
   }
 
-  const handleUninstall = (i: Integration) => {
+  const handleUninstall = async (i: Integration) => {
+    await fetch('/api/marketplace', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ integrationId: i.id, action: 'uninstall' }),
+    })
     setIntegrations(prev => prev.map(x => x.id === i.id ? { ...x, installed: false } : x))
     toast.success(`${i.name} uninstalled`)
   }

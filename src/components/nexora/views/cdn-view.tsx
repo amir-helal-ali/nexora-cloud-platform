@@ -107,7 +107,21 @@ function fmtTtl(secs: number): string {
 export function CdnView() {
   const { metrics } = useRealtime()
   const { t } = useI18n()
-  const [rules, setRules] = useState<CacheRule[]>(CACHE_RULES)
+  const [rules, setRules] = useState<CacheRule[]>([])
+  const [edgeLocations, setEdgeLocations] = useState<EdgeLocation[]>([])
+
+  const fetchCdn = async () => {
+    try {
+      const r = await fetch('/api/cdn')
+      const d = await r.json()
+      setRules(d.cacheRules || [])
+      setEdgeLocations(d.edgeLocations || [])
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  useEffect(() => { fetchCdn() }, [])
   const [purgeOpen, setPurgeOpen] = useState(false)
   const [purgeUrl, setPurgeUrl] = useState('')
 
@@ -117,18 +131,28 @@ export function CdnView() {
   const totalCacheSize = rules.reduce((s, r) => s + r.size, 0)
   const onlineLocations = EDGE_LOCATIONS.filter(l => l.status === 'online').length
 
-  const handlePurge = () => {
+  const handlePurge = async () => {
     if (!purgeUrl.trim()) {
       toast.error('URL is required')
       return
     }
-    toast.success('Cache purged', { description: `Purged ${purgeUrl} from all ${EDGE_LOCATIONS.length} edge locations` })
+    await fetch('/api/cdn', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'purge', url: purgeUrl }),
+    })
+    toast.success('Cache purged', { description: `Purged ${purgeUrl} from all edge locations` })
     setPurgeOpen(false)
     setPurgeUrl('')
   }
 
-  const handlePurgeAll = () => {
-    toast.warning('Purging entire cache', { description: `This will invalidate ${fmtBytes(totalCacheSize)} across all edges` })
+  const handlePurgeAll = async () => {
+    await fetch('/api/cdn', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'purge', url: 'ALL' }),
+    })
+    toast.warning('Purging entire cache')
     setTimeout(() => toast.success('All cache purged'), 2000)
   }
 

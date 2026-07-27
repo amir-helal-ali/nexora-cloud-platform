@@ -102,6 +102,11 @@ function DonutChart({ segments, size = 120 }: { segments: { label: string; value
 
 export function AnalyticsView() {
   const { metrics } = useRealtime()
+  const [analytics, setAnalytics] = useState<any>(null)
+
+  useEffect(() => {
+    fetch('/api/analytics').then(r => r.json()).then(setAnalytics).catch(console.error)
+  }, [])
   const { t } = useI18n()
   const cpuHist = metrics?.history.cpu ?? []
   const memHist = metrics?.history.memory ?? []

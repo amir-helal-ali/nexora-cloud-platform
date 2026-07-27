@@ -92,8 +92,24 @@ const INITIAL_EVENTS: AlertEvent[] = [
 export function MonitoringView() {
   const { metrics } = useRealtime()
   const { t } = useI18n()
-  const [rules, setRules] = useState<AlertRule[]>(INITIAL_RULES)
-  const [events, setEvents] = useState<AlertEvent[]>(INITIAL_EVENTS)
+  const [rules, setRules] = useState<AlertRule[]>([])
+  const [events, setEvents] = useState<AlertEvent[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchMonitoring = async () => {
+    try {
+      const r = await fetch('/api/monitoring')
+      const d = await r.json()
+      setRules(d.rules || [])
+      setEvents(d.events || [])
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { fetchMonitoring() }, [])
   const [createOpen, setCreateOpen] = useState(false)
   const [newRule, setNewRule] = useState({
     name: '',
@@ -105,25 +121,21 @@ export function MonitoringView() {
     channels: ['push'] as string[],
   })
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!newRule.name.trim()) {
       toast.error('Rule name is required')
       return
     }
-    const rule: AlertRule = {
-      id: `rule_${Date.now()}`,
-      name: newRule.name,
-      metric: newRule.metric,
-      operator: newRule.operator,
-      threshold: newRule.threshold,
-      duration: newRule.duration,
-      enabled: true,
-      triggered: 0,
-      lastTriggered: null,
-      severity: newRule.severity,
-      channels: newRule.channels,
+    const r = await fetch('/api/monitoring', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newRule),
+    })
+    if (r.ok) {
+      toast.success('Alert rule created')
+      setCreateOpen(false)
+      fetchMonitoring()
     }
-    setRules([rule, ...rules])
     toast.success('Alert rule created', { description: `${rule.name} is now active` })
     setCreateOpen(false)
     setNewRule({ name: '', metric: 'cpu', operator: '>', threshold: 80, duration: 5, severity: 'warning', channels: ['push'] })

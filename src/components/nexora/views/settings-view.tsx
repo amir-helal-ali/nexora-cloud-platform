@@ -19,6 +19,23 @@ import {
 
 export function SettingsView() {
   const { t } = useI18n()
+  const [profile, setProfile] = useState({ name: 'Ahmed Hassan', email: 'owner@nexora.app' })
+
+  useEffect(() => {
+    fetch('/api/settings').then(r => r.json()).then(d => {
+      if (d.user) setProfile({ name: d.user.name, email: d.user.email })
+    }).catch(() => {})
+  }, [])
+
+  const handleSave = async () => {
+    const r = await fetch('/api/settings', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(profile),
+    })
+    if (r.ok) toast.success(t('settings.saved'))
+  }
+
   return (
     <div className="space-y-5">
       <Tabs defaultValue="account">
@@ -39,11 +56,11 @@ export function SettingsView() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <Label className="text-xs">{t('settings.fullName')}</Label>
-                <Input defaultValue="Ahmed Hassan" className="mt-1.5" />
+                <Input defaultValue={profile.name} className="mt-1.5" />
               </div>
               <div>
                 <Label className="text-xs">{t('settings.email')}</Label>
-                <Input defaultValue="owner@nexora.app" className="mt-1.5" />
+                <Input defaultValue={profile.email} className="mt-1.5" />
               </div>
               <div>
                 <Label className="text-xs">{t('settings.timezone')}</Label>
@@ -71,7 +88,7 @@ export function SettingsView() {
                 </Select>
               </div>
             </div>
-            <Button className="mt-4 bg-gradient-to-br from-emerald-500 to-teal-600 text-white" onClick={() => toast.success(t('settings.saved'))}>
+            <Button className="mt-4 bg-gradient-to-br from-emerald-500 to-teal-600 text-white" onClick={handleSave}>
               {t('settings.saveChanges')}
             </Button>
           </Card>

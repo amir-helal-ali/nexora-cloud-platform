@@ -144,7 +144,22 @@ function fmtDuration(secs: number): string {
 
 export function PipelinesView() {
   const { t } = useI18n()
-  const [pipelines, setPipelines] = useState<Pipeline[]>(PIPELINES)
+  const [pipelines, setPipelines] = useState<Pipeline[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchPipelines = async () => {
+    try {
+      const r = await fetch('/api/pipelines')
+      const d = await r.json()
+      setPipelines(d.pipelines || [])
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { fetchPipelines() }, [])
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [autoRefresh, setAutoRefresh] = useState(true)
 
