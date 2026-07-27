@@ -12,39 +12,41 @@ import {
 } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
+import { useI18n } from '@/hooks/use-i18n'
 import {
   User, CreditCard, Bell, Shield, Globe, Key, Zap, Check, Crown,
 } from 'lucide-react'
 
 export function SettingsView() {
+  const { t } = useI18n()
   return (
     <div className="space-y-5">
       <Tabs defaultValue="account">
         <TabsList>
-          <TabsTrigger value="account" className="gap-1.5"><User className="h-3.5 w-3.5" /> Account</TabsTrigger>
-          <TabsTrigger value="billing" className="gap-1.5"><CreditCard className="h-3.5 w-3.5" /> Billing</TabsTrigger>
-          <TabsTrigger value="notifications" className="gap-1.5"><Bell className="h-3.5 w-3.5" /> Notifications</TabsTrigger>
-          <TabsTrigger value="security" className="gap-1.5"><Shield className="h-3.5 w-3.5" /> Security</TabsTrigger>
-          <TabsTrigger value="api" className="gap-1.5"><Key className="h-3.5 w-3.5" /> API Keys</TabsTrigger>
+          <TabsTrigger value="account" className="gap-1.5"><User className="h-3.5 w-3.5" /> {t('settings.account')}</TabsTrigger>
+          <TabsTrigger value="billing" className="gap-1.5"><CreditCard className="h-3.5 w-3.5" /> {t('settings.billing')}</TabsTrigger>
+          <TabsTrigger value="notifications" className="gap-1.5"><Bell className="h-3.5 w-3.5" /> {t('settings.notifications')}</TabsTrigger>
+          <TabsTrigger value="security" className="gap-1.5"><Shield className="h-3.5 w-3.5" /> {t('settings.security')}</TabsTrigger>
+          <TabsTrigger value="api" className="gap-1.5"><Key className="h-3.5 w-3.5" /> {t('settings.apiKeys')}</TabsTrigger>
         </TabsList>
 
         {/* Account */}
         <TabsContent value="account" className="space-y-4">
           <Card className="p-5">
-            <h3 className="text-sm font-semibold">Profile</h3>
-            <p className="text-xs text-muted-foreground">Your personal information</p>
+            <h3 className="text-sm font-semibold">{t('settings.profile')}</h3>
+            <p className="text-xs text-muted-foreground">{t('settings.profileDesc')}</p>
             <Separator className="my-4" />
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <Label className="text-xs">Full Name</Label>
+                <Label className="text-xs">{t('settings.fullName')}</Label>
                 <Input defaultValue="Ahmed Hassan" className="mt-1.5" />
               </div>
               <div>
-                <Label className="text-xs">Email</Label>
+                <Label className="text-xs">{t('settings.email')}</Label>
                 <Input defaultValue="owner@nexora.app" className="mt-1.5" />
               </div>
               <div>
-                <Label className="text-xs">Timezone</Label>
+                <Label className="text-xs">{t('settings.timezone')}</Label>
                 <Select defaultValue="africa">
                   <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -57,7 +59,7 @@ export function SettingsView() {
                 </Select>
               </div>
               <div>
-                <Label className="text-xs">Default Region</Label>
+                <Label className="text-xs">{t('settings.defaultRegion')}</Label>
                 <Select defaultValue="fra1">
                   <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -69,22 +71,22 @@ export function SettingsView() {
                 </Select>
               </div>
             </div>
-            <Button className="mt-4 bg-gradient-to-br from-emerald-500 to-teal-600 text-white" onClick={() => toast.success('Profile saved')}>
-              Save Changes
+            <Button className="mt-4 bg-gradient-to-br from-emerald-500 to-teal-600 text-white" onClick={() => toast.success(t('settings.saved'))}>
+              {t('settings.saveChanges')}
             </Button>
           </Card>
 
           <Card className="p-5">
-            <h3 className="text-sm font-semibold">Organization</h3>
+            <h3 className="text-sm font-semibold">{t('settings.organization')}</h3>
             <p className="text-xs text-muted-foreground">Manage your organization settings</p>
             <Separator className="my-4" />
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <Label className="text-xs">Organization Name</Label>
+                <Label className="text-xs">{t('settings.organizationName')}</Label>
                 <Input defaultValue="Nexora Cloud" className="mt-1.5" />
               </div>
               <div>
-                <Label className="text-xs">Slug</Label>
+                <Label className="text-xs">{t('settings.slug')}</Label>
                 <Input defaultValue="nexora-cloud" className="mt-1.5" />
               </div>
             </div>
