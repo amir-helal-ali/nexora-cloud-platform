@@ -102,7 +102,7 @@ function DonutChart({ segments, size = 120 }: { segments: { label: string; value
 
 export function AnalyticsView() {
   const { metrics } = useRealtime()
-  const { t } = useI18n()}
+  const { t } = useI18n()
   const cpuHist = metrics?.history.cpu ?? []
   const memHist = metrics?.history.memory ?? []
   const rpsHist = metrics?.history.rps ?? []

@@ -42,7 +42,7 @@ const STAGES = ['queued', 'cloning', 'installing', 'building', 'deploying', 'liv
 
 export function DeploymentsView() {
   const { appStatusEvents } = useRealtime()
-  const { t } = useI18n()}
+  const { t } = useI18n()
   const [deployments, setDeployments] = useState<Deployment[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')

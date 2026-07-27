@@ -36,7 +36,7 @@ interface SimulationState {
 
 export function ScalingSimulatorView() {
   const { metrics } = useRealtime()
-  const { t } = useI18n()}
+  const { t } = useI18n()
   const [running, setRunning] = useState(true)
   const [autoScale, setAutoScale] = useState(true)
   const [targetCpu, setTargetCpu] = useState(70)
