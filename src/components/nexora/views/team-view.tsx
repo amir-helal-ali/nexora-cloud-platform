@@ -17,6 +17,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { fmtDate } from '@/lib/nexora'
+import { useI18n } from '@/hooks/use-i18n'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import {
@@ -42,6 +43,7 @@ const ROLE_META: Record<string, { label: string; icon: any; color: string; bg: s
 }
 
 export function TeamView() {
+  const { t } = useI18n()
   const [members, setMembers] = useState<TeamMember[]>([])
   const [loading, setLoading] = useState(true)
   const [inviteOpen, setInviteOpen] = useState(false)
@@ -113,7 +115,7 @@ export function TeamView() {
             <Users className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
           </div>
           <div>
-            <div className="text-xs text-muted-foreground">Total Members</div>
+            <div className="text-xs text-muted-foreground">{t('overview.team')}</div>
             <div className="text-xl font-bold tabular-nums">{members.length}</div>
           </div>
         </Card>
@@ -122,7 +124,7 @@ export function TeamView() {
             <Check className="h-5 w-5 text-sky-600 dark:text-sky-400" />
           </div>
           <div>
-            <div className="text-xs text-muted-foreground">Active</div>
+            <div className="text-xs text-muted-foreground">{t('overview.active')}</div>
             <div className="text-xl font-bold tabular-nums">{active}</div>
           </div>
         </Card>
@@ -131,7 +133,7 @@ export function TeamView() {
             <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
           </div>
           <div>
-            <div className="text-xs text-muted-foreground">Pending Invites</div>
+            <div className="text-xs text-muted-foreground">{t('overview.pending')}</div>
             <div className="text-xl font-bold tabular-nums">{pending}</div>
           </div>
         </Card>
@@ -140,7 +142,7 @@ export function TeamView() {
       {/* Toolbar */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-sm font-semibold">Team Members</h2>
+          <h2 className="text-sm font-semibold">{t('nav.team')}</h2>
           <p className="text-xs text-muted-foreground">Manage access & permissions across your organization</p>
         </div>
         <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
@@ -157,7 +159,7 @@ export function TeamView() {
             <div className="space-y-3 py-2">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-xs font-medium">Name</Label>
+                  <Label className="text-xs font-medium">{t('settings.fullName')}</Label>
                   <Input
                     value={invite.name}
                     onChange={(e) => setInvite({ ...invite, name: e.target.value })}
@@ -166,7 +168,7 @@ export function TeamView() {
                   />
                 </div>
                 <div>
-                  <Label className="text-xs font-medium">Email</Label>
+                  <Label className="text-xs font-medium">{t('settings.email')}</Label>
                   <Input
                     value={invite.email}
                     onChange={(e) => setInvite({ ...invite, email: e.target.value })}
@@ -176,7 +178,7 @@ export function TeamView() {
                 </div>
               </div>
               <div>
-                <Label className="text-xs font-medium">Role</Label>
+                <Label className="text-xs font-medium">{t('notifications.type')}</Label>
                 <Select value={invite.role} onValueChange={(v) => setInvite({ ...invite, role: v })}>
                   <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -188,7 +190,7 @@ export function TeamView() {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setInviteOpen(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setInviteOpen(false)}>{t('common.cancel')}</Button>
               <Button onClick={handleInvite} className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
                 <Mail className="h-4 w-4" /> Send Invite
               </Button>
@@ -261,13 +263,13 @@ export function TeamView() {
 
       {/* Role permissions matrix */}
       <Card className="p-5">
-        <h3 className="text-sm font-semibold">Role Permissions</h3>
+        <h3 className="text-sm font-semibold">{t('nav.team')}</h3>
         <p className="text-xs text-muted-foreground">What each role can do in your organization</p>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
               <tr className="border-b">
-                <th className="py-2 pr-4 text-left font-medium text-muted-foreground">Permission</th>
+                <th className="py-2 pr-4 text-left font-medium text-muted-foreground">{t('overview.team')}</th>
                 <th className="px-3 text-center font-medium">Owner</th>
                 <th className="px-3 text-center font-medium">Admin</th>
                 <th className="px-3 text-center font-medium">Developer</th>
