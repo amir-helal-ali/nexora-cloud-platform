@@ -13,6 +13,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select'
 import { STATUS_META, fmtDate } from '@/lib/nexora'
+import { useI18n } from '@/hooks/use-i18n'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import {
@@ -38,6 +39,7 @@ interface Domain {
 }
 
 export function DomainsView() {
+  const { t } = useI18n()
   const [domains, setDomains] = useState<Domain[]>([])
   const [loading, setLoading] = useState(true)
   const [createOpen, setCreateOpen] = useState(false)
@@ -104,7 +106,7 @@ export function DomainsView() {
             <ShieldCheck className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
           </div>
           <div>
-            <div className="text-xs text-muted-foreground">SSL Active</div>
+            <div className="text-xs text-muted-foreground">{t('overview.sslActive')}</div>
             <div className="text-xl font-bold tabular-nums">{sslActive} / {domains.length}</div>
           </div>
         </Card>
@@ -113,7 +115,7 @@ export function DomainsView() {
             <ShieldAlert className="h-5 w-5 text-amber-600 dark:text-amber-400" />
           </div>
           <div>
-            <div className="text-xs text-muted-foreground">Expiring Soon</div>
+            <div className="text-xs text-muted-foreground">{t('overview.expiringSoon')}</div>
             <div className="text-xl font-bold tabular-nums">{sslExpiring}</div>
           </div>
         </Card>
@@ -122,7 +124,7 @@ export function DomainsView() {
             <Globe className="h-5 w-5 text-sky-600 dark:text-sky-400" />
           </div>
           <div>
-            <div className="text-xs text-muted-foreground">Total Domains</div>
+            <div className="text-xs text-muted-foreground">{t('overview.totalDomains')}</div>
             <div className="text-xl font-bold tabular-nums">{domains.length}</div>
           </div>
         </Card>
@@ -131,7 +133,7 @@ export function DomainsView() {
       {/* Toolbar */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-sm font-semibold">Domains</h2>
+          <h2 className="text-sm font-semibold">{t('nav.domains')}</h2>
           <p className="text-xs text-muted-foreground">All domains linked to your apps · auto-renew enabled</p>
         </div>
         <Dialog open={createOpen} onOpenChange={setCreateOpen}>
@@ -142,12 +144,12 @@ export function DomainsView() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add Domain</DialogTitle>
+              <DialogTitle>{t('common.new')}</DialogTitle>
               <DialogDescription>We'll automatically provision an SSL certificate via Let's Encrypt.</DialogDescription>
             </DialogHeader>
             <div className="space-y-3 py-2">
               <div>
-                <Label className="text-xs font-medium">Domain Name</Label>
+                <Label className="text-xs font-medium">{t('databases.databaseName')}</Label>
                 <Input
                   value={newDomain.domain}
                   onChange={(e) => setNewDomain({ ...newDomain, domain: e.target.value })}
@@ -156,7 +158,7 @@ export function DomainsView() {
                 />
               </div>
               <div>
-                <Label className="text-xs font-medium">Type</Label>
+                <Label className="text-xs font-medium">{t('notifications.type')}</Label>
                 <Select value={newDomain.type} onValueChange={(v) => setNewDomain({ ...newDomain, type: v })}>
                   <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -169,7 +171,7 @@ export function DomainsView() {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setCreateOpen(false)}>{t('common.cancel')}</Button>
               <Button onClick={handleCreate} className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
                 Add Domain
               </Button>
