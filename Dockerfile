@@ -8,7 +8,7 @@
 # ============================================================================
 
 # ---- Stage 1: deps ----
-FROM node:24-alpine AS deps
+FROM node:26-alpine AS deps
 RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
 
@@ -27,7 +27,7 @@ RUN --mount=type=cache,id=bun-cache,target=/root/.bun/install/cache \
     fi
 
 # ---- Stage 2: builder ----
-FROM node:24-alpine AS builder
+FROM node:26-alpine AS builder
 RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
 
@@ -47,13 +47,13 @@ RUN npx prisma generate
 RUN npm run build
 
 # ---- Stage 3: realtime-deps ----
-FROM node:24-alpine AS realtime-deps
+FROM node:26-alpine AS realtime-deps
 WORKDIR /app/mini-services/realtime-service
 COPY mini-services/realtime-service/package.json mini-services/realtime-service/bun.lock* ./
 RUN npm install -g bun && bun install --frozen-lockfile
 
 # ---- Stage 4: runner (final image) ----
-FROM node:24-alpine AS runner
+FROM node:26-alpine AS runner
 LABEL org.opencontainers.image.title="Nexora Cloud Platform"
 LABEL org.opencontainers.image.description="Multi-runtime hosting platform — Rust, PHP, Next.js, WebSocket, Push Notifications"
 LABEL org.opencontainers.image.source="https://github.com/nexora-cloud/platform"
