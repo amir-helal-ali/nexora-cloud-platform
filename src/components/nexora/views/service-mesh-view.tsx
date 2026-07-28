@@ -118,9 +118,9 @@ export function ServiceMeshView() {
   const totalRps = edges.reduce((s, e) => s + e.rps, 0)
   const avgLatency = edges.length > 0 ? edges.reduce((s, e) => s + e.latency, 0) / edges.length : 0
   const totalErrors = edges.reduce((s, e) => s + e.errorRate, 0)
-  const healthyCount = NODES.filter(n => n.status === 'healthy').length
+  const healthyCount = nodes.filter(n => n.status === 'healthy').length
 
-  const selectedNodeData = NODES.find(n => n.id === selectedNode)
+  const selectedNodeData = nodes.find(n => n.id === selectedNode)
   const incomingEdges = edges.filter(e => e.to === selectedNode)
   const outgoingEdges = edges.filter(e => e.from === selectedNode)
 
@@ -132,7 +132,7 @@ export function ServiceMeshView() {
           <div className="flex items-center justify-between">
             <div>
               <div className="text-xs text-muted-foreground">{t('mesh.services')}</div>
-              <div className="mt-1 text-2xl font-bold tabular-nums">{NODES.length}</div>
+              <div className="mt-1 text-2xl font-bold tabular-nums">{nodes.length}</div>
               <div className="text-[10px] text-emerald-600 dark:text-emerald-400">{healthyCount} healthy</div>
             </div>
             <Server className="h-5 w-5 text-emerald-500" />
@@ -205,8 +205,9 @@ export function ServiceMeshView() {
                     </marker>
                   </defs>
                   {edges.map((e, i) => {
-                    const from = NODES.find(n => n.id === e.from)!
-                    const to = NODES.find(n => n.id === e.to)!
+                    const from = nodes.find(n => n.id === e.from)
+                    const to = nodes.find(n => n.id === e.to)
+                    if (!from || !to) return null
                     const isSelected = e.from === selectedNode || e.to === selectedNode
                     return (
                       <g key={i} className={cn('transition-opacity', !isSelected && selectedNode && 'opacity-30')}>
@@ -231,7 +232,7 @@ export function ServiceMeshView() {
                   })}
                 </svg>
                 {/* Nodes */}
-                {NODES.map(n => {
+                {nodes.map(n => {
                   const Icon = n.icon
                   const status = STATUS_META[n.status]
                   const isSelected = n.id === selectedNode
@@ -298,7 +299,8 @@ export function ServiceMeshView() {
                       {incomingEdges.length === 0 ? (
                         <p className="text-[10px] text-muted-foreground">No incoming traffic</p>
                       ) : incomingEdges.map((e, i) => {
-                        const from = NODES.find(n => n.id === e.from)!
+                        const from = nodes.find(n => n.id === e.from)
+                        if (!from) return null
                         return (
                           <div key={i} className="flex items-center gap-1.5 text-[10px]">
                             <span className="truncate">{from.name}</span>
@@ -318,7 +320,8 @@ export function ServiceMeshView() {
                       {outgoingEdges.length === 0 ? (
                         <p className="text-[10px] text-muted-foreground">No outgoing traffic</p>
                       ) : outgoingEdges.map((e, i) => {
-                        const to = NODES.find(n => n.id === e.to)!
+                        const to = nodes.find(n => n.id === e.to)
+                        if (!to) return null
                         return (
                           <div key={i} className="flex items-center gap-1.5 text-[10px]">
                             <span className="truncate">{to.name}</span>
