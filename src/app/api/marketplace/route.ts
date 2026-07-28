@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withAuth, getClientIp } from '@/lib/api'
-import { logAudit } from '@/lib/security'
+import { logAudit, schemas } from '@/lib/security'
 import { db } from '@/lib/db'
 
 interface Integration {
@@ -50,6 +50,10 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   return withAuth(req, async ({ userId, userEmail }) => {
     const body = await req.json()
+    const validation = schemas.marketplaceAction.safeParse(body)
+    if (!validation.success) {
+      return NextResponse.json({ error: 'Validation failed', details: validation.error.errors }, { status: 400 })
+    }
     const { integrationId, action } = body
     integrationsStore = integrationsStore.map(i =>
       i.id === integrationId ? { ...i, installed: action === 'install' } : i

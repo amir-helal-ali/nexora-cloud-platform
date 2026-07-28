@@ -143,6 +143,80 @@ export const schemas = {
     severity: z.enum(['info', 'warning', 'critical']).default('warning'),
     channels: z.array(z.string()).default(['push']),
   }),
+
+  // PATCH schemas for [id] routes
+  updateApp: z.object({
+    status: z.enum(['running', 'building', 'deploying', 'stopped', 'crashed']).optional(),
+    instances: z.number().int().min(0).max(100).optional(),
+    memoryLimit: z.number().int().min(128).optional(),
+    cpuLimit: z.number().int().min(1).optional(),
+    autoScale: z.boolean().optional(),
+    minInstances: z.number().int().min(0).optional(),
+    maxInstances: z.number().int().min(1).optional(),
+  }),
+
+  updateDatabase: z.object({
+    status: z.enum(['running', 'stopped', 'creating', 'backup']).optional(),
+    size: z.number().int().min(1).max(1024).optional(),
+    maxConnections: z.number().int().min(1).optional(),
+    backupEnabled: z.boolean().optional(),
+  }),
+
+  updateFlag: z.object({
+    enabled: z.boolean().optional(),
+    percentage: z.number().int().min(0).max(100).optional(),
+    name: z.string().min(2).max(100).optional(),
+    description: z.string().optional(),
+  }),
+
+  updateGatewayRoute: z.object({
+    status: z.enum(['active', 'paused', 'error']).optional(),
+    rateLimit: z.number().int().min(1).max(100000).optional(),
+    auth: z.enum(['none', 'api_key', 'jwt', 'oauth2']).optional(),
+    cacheEnabled: z.boolean().optional(),
+    corsEnabled: z.boolean().optional(),
+  }),
+
+  updateTeamMember: z.object({
+    role: z.enum(['admin', 'developer', 'viewer']).optional(),
+    status: z.enum(['active', 'pending', 'suspended']).optional(),
+  }),
+
+  updateNotification: z.object({
+    opened: z.number().int().optional(),
+    status: z.enum(['queued', 'sent', 'delivered', 'failed']).optional(),
+  }),
+
+  updateSecret: z.object({
+    rotated: z.boolean().optional(),
+    value: z.string().optional(),
+  }),
+
+  deployApp: z.object({
+    commitSha: z.string().optional(),
+    commitMsg: z.string().optional(),
+  }),
+
+  createBackupRequest: z.object({
+    resource: z.string().min(1),
+    type: z.enum(['manual', 'snapshot']).default('manual'),
+  }),
+
+  cdnPurge: z.object({
+    action: z.enum(['purge']),
+    url: z.string().optional(),
+  }),
+
+  marketplaceAction: z.object({
+    integrationId: z.string().min(1),
+    action: z.enum(['install', 'uninstall']),
+  }),
+
+  updateProfile: z.object({
+    name: z.string().min(2).max(100),
+    email: z.string().email(),
+    avatar: z.string().optional(),
+  }),
 }
 
 // ─── Rate limiting (in-memory, sliding window) ───

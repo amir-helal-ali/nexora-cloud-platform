@@ -1,11 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { withAuth, getClientIp } from '@/lib/api'
-import { logAudit } from '@/lib/security'
+import { logAudit, schemas } from '@/lib/security'
 
 export async function POST(req: NextRequest) {
   return withAuth(req, async ({ userId, userEmail }) => {
     const body = await req.json().catch(() => ({}))
+    const validation = schemas.createNotification.safeParse({
+      title: body.title || 'Test Push',
+      message: body.message || 'Test message',
+      type: body.type || 'info',
+      channel: 'push',
+    })
+    if (!validation.success) {
+      return NextResponse.json({ error: 'Validation failed' }, { status: 400 })
+    }
     const notif = await db.notification.create({
       data: {
         userId, title: body.title || 'Test Push Notification',

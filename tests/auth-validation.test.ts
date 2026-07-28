@@ -336,3 +336,115 @@ describe('Security: Rate Limiting Edge Cases', () => {
     expect(r2.remaining).toBe(4)
   })
 })
+
+describe('Validation: Update Schemas (PATCH routes)', () => {
+  it('should validate updateApp with partial data', () => {
+    const result = schemas.updateApp.safeParse({ status: 'running' })
+    expect(result.success).toBe(true)
+  })
+
+  it('should reject invalid status in updateApp', () => {
+    const result = schemas.updateApp.safeParse({ status: 'invalid' })
+    expect(result.success).toBe(false)
+  })
+
+  it('should validate updateDatabase with partial data', () => {
+    const result = schemas.updateDatabase.safeParse({ size: 10 })
+    expect(result.success).toBe(true)
+  })
+
+  it('should validate updateFlag toggle', () => {
+    const result = schemas.updateFlag.safeParse({ enabled: true })
+    expect(result.success).toBe(true)
+  })
+
+  it('should validate updateFlag percentage', () => {
+    const result = schemas.updateFlag.safeParse({ percentage: 50 })
+    expect(result.success).toBe(true)
+  })
+
+  it('should reject percentage > 100', () => {
+    const result = schemas.updateFlag.safeParse({ percentage: 150 })
+    expect(result.success).toBe(false)
+  })
+
+  it('should validate updateGatewayRoute status', () => {
+    const result = schemas.updateGatewayRoute.safeParse({ status: 'paused' })
+    expect(result.success).toBe(true)
+  })
+
+  it('should validate updateTeamMember role', () => {
+    const result = schemas.updateTeamMember.safeParse({ role: 'admin' })
+    expect(result.success).toBe(true)
+  })
+
+  it('should reject invalid role in updateTeamMember', () => {
+    const result = schemas.updateTeamMember.safeParse({ role: 'superadmin' })
+    expect(result.success).toBe(false)
+  })
+
+  it('should validate updateNotification opened', () => {
+    const result = schemas.updateNotification.safeParse({ opened: 1 })
+    expect(result.success).toBe(true)
+  })
+
+  it('should validate updateSecret rotated', () => {
+    const result = schemas.updateSecret.safeParse({ rotated: true })
+    expect(result.success).toBe(true)
+  })
+
+  it('should validate deployApp with optional fields', () => {
+    const result = schemas.deployApp.safeParse({})
+    expect(result.success).toBe(true)
+  })
+
+  it('should validate deployApp with commit info', () => {
+    const result = schemas.deployApp.safeParse({ commitSha: 'abc1234', commitMsg: 'fix: test' })
+    expect(result.success).toBe(true)
+  })
+
+  it('should validate createBackupRequest', () => {
+    const result = schemas.createBackupRequest.safeParse({ resource: 'postgres-main' })
+    expect(result.success).toBe(true)
+  })
+
+  it('should reject empty resource in createBackupRequest', () => {
+    const result = schemas.createBackupRequest.safeParse({ resource: '' })
+    expect(result.success).toBe(false)
+  })
+
+  it('should validate cdnPurge', () => {
+    const result = schemas.cdnPurge.safeParse({ action: 'purge', url: '/api/test' })
+    expect(result.success).toBe(true)
+  })
+
+  it('should reject invalid action in cdnPurge', () => {
+    const result = schemas.cdnPurge.safeParse({ action: 'delete' })
+    expect(result.success).toBe(false)
+  })
+
+  it('should validate marketplaceAction install', () => {
+    const result = schemas.marketplaceAction.safeParse({ integrationId: 'i1', action: 'install' })
+    expect(result.success).toBe(true)
+  })
+
+  it('should validate marketplaceAction uninstall', () => {
+    const result = schemas.marketplaceAction.safeParse({ integrationId: 'i1', action: 'uninstall' })
+    expect(result.success).toBe(true)
+  })
+
+  it('should reject invalid action in marketplaceAction', () => {
+    const result = schemas.marketplaceAction.safeParse({ integrationId: 'i1', action: 'delete' })
+    expect(result.success).toBe(false)
+  })
+
+  it('should validate updateProfile', () => {
+    const result = schemas.updateProfile.safeParse({ name: 'Updated Name', email: 'test@example.com' })
+    expect(result.success).toBe(true)
+  })
+
+  it('should reject invalid email in updateProfile', () => {
+    const result = schemas.updateProfile.safeParse({ name: 'Test', email: 'not-email' })
+    expect(result.success).toBe(false)
+  })
+})

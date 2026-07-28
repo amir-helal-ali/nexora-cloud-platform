@@ -96,12 +96,24 @@ function fmtNum(n: number): string {
 
 export function ServiceMeshView() {
   const { t } = useI18n()
-  const [edges, setEdges] = useState(EDGES)
+  const [nodes, setNodes] = useState<ServiceNode[]>(NODES)
+  const [edges, setEdges] = useState<ServiceEdge[]>([])
   const [selectedNode, setSelectedNode] = useState<string | null>('gateway')
   const [mTLS, setMTLS] = useState(true)
   const [tracing, setTracing] = useState(true)
   const [circuitBreaker, setCircuitBreaker] = useState(true)
   const [loadBalancing, setLoadBalancing] = useState(true)
+
+  // Fetch mesh topology from API
+  useEffect(() => {
+    fetch('/api/mesh')
+      .then(r => r.json())
+      .then(d => {
+        if (d.nodes) setNodes(d.nodes)
+        if (d.edges) setEdges(d.edges)
+      })
+      .catch(console.error)
+  }, [])
 
   // Simulate live metric updates
   useEffect(() => {

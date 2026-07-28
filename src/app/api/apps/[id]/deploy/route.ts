@@ -1,12 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { withAuth, getClientIp } from '@/lib/api'
-import { logAudit } from '@/lib/security'
+import { logAudit, schemas } from '@/lib/security'
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   return withAuth(req, async ({ userId, userEmail }) => {
     const { id } = await params
-    const body = await req.json().catch(() => ({}))
+    const body = await req.json()
+    const validation = schemas.deployApp.safeParse(body)
+    if (!validation.success) {
+      return NextResponse.json({ error: 'Validation failed', details: validation.error.errors }, { status: 400 })
+    }
+    const data = validation.data.catch(() => ({}))
     const app = await db.app.findUnique({ where: { id } })
     if (!app) return NextResponse.json({ error: 'App not found' }, { status: 404 })
 

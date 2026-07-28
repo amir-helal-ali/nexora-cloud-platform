@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { withAuth, getClientIp } from '@/lib/api'
-import { logAudit } from '@/lib/security'
+import { logAudit, schemas } from '@/lib/security'
 
 export async function GET(req: NextRequest) {
   return withAuth(req, async ({ userId }) => {
@@ -17,6 +17,10 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   return withAuth(req, async ({ userId, userEmail }) => {
     const body = await req.json()
+    const validation = schemas.createBackupRequest.safeParse(body)
+    if (!validation.success) {
+      return NextResponse.json({ error: 'Validation failed', details: validation.error.errors }, { status: 400 })
+    }
     const resource = body.resource || 'unknown'
     const type = body.type || 'manual'
 
