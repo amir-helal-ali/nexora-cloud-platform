@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { withAuth } from '@/lib/api'
+import { withAuth, getClientIp } from '@/lib/api'
+import { logAudit } from '@/lib/security'
+import { db } from '@/lib/db'
 
-// CDN edge locations (static config — would come from CDN provider API in production)
 const EDGE_LOCATIONS = [
   { id: 'l1', city: 'Frankfurt', country: 'Germany', flag: '🇩🇪', region: 'EU', requests: 2840000, cacheHitRate: 94.2, latency: 12, bandwidthMbps: 142, status: 'online' },
   { id: 'l2', city: 'London', country: 'UK', flag: '🇬🇧', region: 'EU', requests: 1620000, cacheHitRate: 91.8, latency: 18, bandwidthMbps: 89, status: 'online' },
@@ -37,35 +38,20 @@ export async function GET(req: NextRequest) {
     const totalBandwidth = EDGE_LOCATIONS.reduce((s, l) => s + l.bandwidthMbps, 0)
     const totalCacheSize = CACHE_RULES.reduce((s, r) => s + r.size, 0)
     const onlineLocations = EDGE_LOCATIONS.filter(l => l.status === 'online').length
-
     return NextResponse.json({
-      edgeLocations: EDGE_LOCATIONS,
-      cacheRules: CACHE_RULES,
-      stats: {
-        onlineLocations,
-        totalLocations: EDGE_LOCATIONS.length,
-        totalRequests,
-        avgHitRate,
-        totalBandwidth,
-        totalCacheSize,
-      },
+      edgeLocations: EDGE_LOCATIONS, cacheRules: CACHE_RULES,
+      stats: { onlineLocations, totalLocations: EDGE_LOCATIONS.length, totalRequests, avgHitRate, totalBandwidth, totalCacheSize },
     })
   })
 }
 
 export async function POST(req: NextRequest) {
-  return withAuth(req, async () => {
+  return withAuth(req, async ({ userId, userEmail }) => {
     const body = await req.json()
-    const { action, url } = body
-
-    if (action === 'purge') {
-      // In production, this would call the CDN provider's purge API
-      return NextResponse.json({
-        success: true,
-        message: `Purged ${url || 'all'} from ${EDGE_LOCATIONS.length} edge locations`,
-      })
+    if (body.action === 'purge') {
+      await logAudit({ db, userId, actor: userEmail, action: 'purge_cache', category: 'config', resource: 'cdn', resourceId: null, ip: getClientIp(req), details: `Purged cache: ${body.url || 'ALL'}`, severity: 'warning' })
+      return NextResponse.json({ success: true, message: `Purged ${body.url || 'all'} from ${EDGE_LOCATIONS.length} edge locations` })
     }
-
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
   })
 }

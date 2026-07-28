@@ -1,17 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { withAuth } from '@/lib/api'
+import { withAuth, getClientIp } from '@/lib/api'
+import { logAudit } from '@/lib/security'
+import { db } from '@/lib/db'
 
 interface Integration {
-  id: string
-  name: string
-  description: string
-  category: string
-  installed: boolean
-  featured: boolean
-  rating: number
-  installs: string
-  author: string
-  tags: string[]
+  id: string; name: string; description: string; category: string;
+  installed: boolean; featured: boolean; rating: number; installs: string; author: string; tags: string[];
 }
 
 const INTEGRATIONS: Integration[] = [
@@ -45,7 +39,6 @@ const INTEGRATIONS: Integration[] = [
   { id: 'i28', name: 'Shopify', description: 'E-commerce platform with storefront API, webhooks, and 6000+ apps.', category: 'commerce', installed: false, featured: false, rating: 4.5, installs: '12K', author: 'Shopify', tags: ['ecommerce', 'storefront', 'shopify'] },
 ]
 
-// In-memory mutable store
 let integrationsStore = [...INTEGRATIONS]
 
 export async function GET(req: NextRequest) {
@@ -55,21 +48,14 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  return withAuth(req, async () => {
+  return withAuth(req, async ({ userId, userEmail }) => {
     const body = await req.json()
-    const { integrationId, action } = body // action: 'install' | 'uninstall'
-
+    const { integrationId, action } = body
     integrationsStore = integrationsStore.map(i =>
-      i.id === integrationId
-        ? { ...i, installed: action === 'install' }
-        : i
+      i.id === integrationId ? { ...i, installed: action === 'install' } : i
     )
-
     const integration = integrationsStore.find(i => i.id === integrationId)
-    return NextResponse.json({
-      success: true,
-      integration,
-      installed: action === 'install',
-    })
+    await logAudit({ db, userId, actor: userEmail, action: action === 'install' ? 'install_integration' : 'uninstall_integration', category: 'config', resource: 'marketplace', resourceId: integrationId, ip: getClientIp(req), details: `${action === 'install' ? 'Installed' : 'Uninstalled'} integration: ${integration?.name || integrationId}`, severity: 'info' })
+    return NextResponse.json({ success: true, integration, installed: action === 'install' })
   })
 }
