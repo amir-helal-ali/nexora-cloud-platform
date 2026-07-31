@@ -6,14 +6,14 @@
 # ============================================================================
 
 # ---- Stage 1: deps ----
-FROM node:24-alpine AS deps
+FROM node:25-alpine AS deps
 WORKDIR /app
 RUN npm install -g bun
 COPY mini-services/realtime-service/package.json mini-services/realtime-service/bun.lock* ./
 RUN bun install --frozen-lockfile
 
 # ---- Stage 2: runner ----
-FROM node:24-alpine AS runner
+FROM node:25-alpine AS runner
 LABEL org.opencontainers.image.title="Nexora Cloud — Realtime Service"
 LABEL org.opencontainers.image.description="Socket.io WebSocket service for live metrics & push notifications"
 
