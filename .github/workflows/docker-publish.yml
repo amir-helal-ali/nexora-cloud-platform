@@ -74,7 +74,7 @@ jobs:
             org.opencontainers.image.licenses=MIT
 
       - name: 🏗️ Build & push dashboard
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ./Dockerfile
@@ -147,7 +147,7 @@ jobs:
             org.opencontainers.image.description=Socket.io WebSocket service
 
       - name: 🏗️ Build & push realtime
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ./Dockerfile.realtime

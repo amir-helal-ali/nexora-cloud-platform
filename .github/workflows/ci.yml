@@ -264,7 +264,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: 🏗️ Build dashboard image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ./Dockerfile
@@ -274,7 +274,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: 🏗️ Build realtime image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ./Dockerfile.realtime
